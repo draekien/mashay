@@ -52,3 +52,11 @@ lefthook runs on pre-commit: `pnpm typecheck`, then `biome check --write` on sta
 ## Design context
 
 - `DESIGN.md` — the visual system spec (tokens, typography, components, do's/don'ts) for the `academic` template + theme, describing the CSS-custom-property token system in `themes/academic/theme.css`. Read it before changing a template, theme, or any rendered-HTML feature.
+
+## Code style
+
+- never write inline comments with the purpose of explaining your reasoning or your code.
+- code must be self-documenting and rank low on cognitive complexity.
+- document module exports appropriately using well structured JSDoc comments.
+- JSDoc comments must not contain implementation detail. They are there to orient the consumers of the module export.
+- never use type casting. narrow types with type narrowing/assertion functions instead, or parse objects through zod schemas.

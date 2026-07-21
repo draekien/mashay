@@ -4,7 +4,9 @@ import { compile } from "@tailwindcss/node";
 import { Scanner } from "@tailwindcss/oxide";
 import matter from "gray-matter";
 import { VFile } from "vfile";
+import type { ZodError } from "zod";
 import { buildChangelog, buildEyebrow, buildMetaGrid } from "./doc-header.js";
+import { BuildError, type BuildErrorKind } from "./errors.js";
 import {
   type Frontmatter,
   FrontmatterSchema,
@@ -30,6 +32,17 @@ interface TemplateAssets {
   mermaidScript: string;
 }
 
+function reason(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
+function formatFrontmatterError(srcPath: string, error: ZodError): string {
+  const lines = error.issues.map(
+    (issue) => `  - ${issue.path.join(".") || "(root)"}: ${issue.message}`,
+  );
+  return `invalid frontmatter in ${srcPath}:\n${lines.join("\n")}`;
+}
+
 const RASTER_LOGO_MIME: Record<string, string> = {
   ".png": "image/png",
   ".jpg": "image/jpeg",
@@ -51,16 +64,31 @@ async function resolveLogo(
   const resolved = path.resolve(path.dirname(srcPath), logoPath);
   const ext = path.extname(resolved).toLowerCase();
   if (ext === ".svg") {
-    return await readFile(resolved, "utf8");
+    try {
+      return await readFile(resolved, "utf8");
+    } catch (err) {
+      throw new BuildError(
+        "logo",
+        `logo "${logoPath}" (from frontmatter in ${srcPath}) could not be read — looked for ${resolved}: ${reason(err)}`,
+      );
+    }
   }
   const mime = RASTER_LOGO_MIME[ext];
   if (!mime) {
-    throw new Error(
+    throw new BuildError(
+      "logo",
       `unsupported logo format "${ext}" in ${srcPath}: use an SVG or a PNG/JPEG/GIF/WebP/AVIF image`,
     );
   }
-  const data = await readFile(resolved);
-  return `<img src="data:${mime};base64,${data.toString("base64")}" alt="" />`;
+  try {
+    const data = await readFile(resolved);
+    return `<img src="data:${mime};base64,${data.toString("base64")}" alt="" />`;
+  } catch (err) {
+    throw new BuildError(
+      "logo",
+      `logo "${logoPath}" (from frontmatter in ${srcPath}) could not be read — looked for ${resolved}: ${reason(err)}`,
+    );
+  }
 }
 
 async function renderHtml(
@@ -120,31 +148,58 @@ async function renderOne(
   srcPath: string,
   outDir: string,
 ): Promise<{ outNames: string[]; hasMermaid: boolean }> {
-  const raw = await readFile(srcPath, "utf8");
-  const { data, content } = matter(raw);
+  let raw: string;
+  try {
+    raw = await readFile(srcPath, "utf8");
+  } catch (err) {
+    throw new BuildError(
+      "source-read",
+      `could not read ${srcPath}: ${reason(err)}`,
+    );
+  }
+
+  let data: { [key: string]: unknown };
+  let content: string;
+  try {
+    const file = matter(raw);
+    data = file.data;
+    content = file.content;
+  } catch (err) {
+    throw new BuildError(
+      "frontmatter",
+      `could not parse frontmatter in ${srcPath}: ${reason(err)}`,
+    );
+  }
+
   const parsed = FrontmatterSchema.safeParse(data);
   if (!parsed.success) {
-    throw new Error(
-      `invalid frontmatter in ${srcPath}: ${parsed.error.issues
-        .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
-        .join("; ")}`,
+    throw new BuildError(
+      "frontmatter",
+      formatFrontmatterError(srcPath, parsed.error),
     );
   }
   const frontmatter = parsed.data;
   const base = path.basename(srcPath, ".md");
   const logo = await resolveLogo(frontmatter.logo, srcPath);
 
-  const html = await renderHtml(
-    assets,
-    frontmatter,
-    logo,
-    content,
-    srcPath,
-    base,
-    outDir,
-  );
-
-  return { outNames: [html.outName], hasMermaid: html.hasMermaid };
+  try {
+    const html = await renderHtml(
+      assets,
+      frontmatter,
+      logo,
+      content,
+      srcPath,
+      base,
+      outDir,
+    );
+    return { outNames: [html.outName], hasMermaid: html.hasMermaid };
+  } catch (err) {
+    if (err instanceof BuildError) throw err;
+    throw new BuildError(
+      "render",
+      `failed to render ${srcPath}: ${reason(err)}`,
+    );
+  }
 }
 
 async function listNames(dir: string): Promise<string[]> {
@@ -162,7 +217,8 @@ async function resolveTemplateFile(name: string): Promise<string> {
     return file;
   } catch {
     const available = await listNames(TEMPLATES_DIR);
-    throw new Error(
+    throw new BuildError(
+      "unknown-template",
       `unknown template "${name}" — available templates: ${available.join(", ") || "(none)"}`,
     );
   }
@@ -175,7 +231,8 @@ async function resolveThemeFile(name: string): Promise<string> {
     return file;
   } catch {
     const available = await listNames(THEMES_DIR);
-    throw new Error(
+    throw new BuildError(
+      "unknown-theme",
       `unknown theme "${name}" — available themes: ${available.join(", ") || "(none)"}`,
     );
   }
@@ -243,21 +300,57 @@ export interface BuildResult {
   hasMermaid: boolean;
 }
 
-/** Renders each given Markdown file to `outDir` as self-contained HTML. */
+export interface BuildFailure {
+  file: string;
+  kind: BuildErrorKind;
+  message: string;
+}
+
+export interface BuildSummary {
+  results: BuildResult[];
+  failures: BuildFailure[];
+}
+
+/**
+ * Renders each given Markdown file to `outDir` as self-contained HTML. Setup
+ * problems (unknown template/theme, uncreatable output directory) throw a
+ * BuildError and abort the whole run; per-document failures are caught and
+ * returned in `failures` so one bad document never stops the rest of a batch.
+ */
 export async function buildDocuments(
   files: string[],
   outDir: string,
   options: BuildOptions,
-): Promise<BuildResult[]> {
-  if (files.length === 0) return [];
+): Promise<BuildSummary> {
+  if (files.length === 0) return { results: [], failures: [] };
 
-  await mkdir(outDir, { recursive: true });
+  try {
+    await mkdir(outDir, { recursive: true });
+  } catch (err) {
+    throw new BuildError(
+      "output-dir",
+      `could not create output directory ${outDir}: ${reason(err)}`,
+    );
+  }
   const assets = await loadTemplateAssets(options);
 
   const results: BuildResult[] = [];
+  const failures: BuildFailure[] = [];
   for (const file of files) {
-    const { outNames, hasMermaid } = await renderOne(assets, file, outDir);
-    results.push({ file, outNames, hasMermaid });
+    try {
+      const { outNames, hasMermaid } = await renderOne(assets, file, outDir);
+      results.push({ file, outNames, hasMermaid });
+    } catch (err) {
+      if (err instanceof BuildError) {
+        failures.push({ file, kind: err.kind, message: err.message });
+      } else {
+        failures.push({
+          file,
+          kind: "render",
+          message: `failed to render ${file}: ${reason(err)}`,
+        });
+      }
+    }
   }
-  return results;
+  return { results, failures };
 }

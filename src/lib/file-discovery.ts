@@ -1,9 +1,15 @@
 import { readdir, stat } from "node:fs/promises";
 import path from "node:path";
+import { BuildError } from "./errors.js";
 
 /** Resolves a CLI-provided source argument (a single .md file, or a directory of .md files) to a flat file list. */
 export async function resolveMarkdownFiles(srcPath: string): Promise<string[]> {
-  const srcStat = await stat(srcPath);
+  let srcStat: Awaited<ReturnType<typeof stat>>;
+  try {
+    srcStat = await stat(srcPath);
+  } catch {
+    throw new BuildError("no-input", `source path not found: ${srcPath}`);
+  }
 
   if (srcStat.isDirectory()) {
     const entries = await readdir(srcPath);
@@ -14,7 +20,8 @@ export async function resolveMarkdownFiles(srcPath: string): Promise<string[]> {
   }
 
   if (!srcPath.endsWith(".md")) {
-    throw new Error(
+    throw new BuildError(
+      "no-input",
       `expected a .md file or a directory of .md files, got: ${srcPath}`,
     );
   }

@@ -1,9 +1,21 @@
+import { EXIT_CODE_TABLE } from "./errors.js";
+
 export interface FormattingTopic {
   id: string;
   title: string;
   summary: string;
   example?: string;
 }
+
+const EXIT_CODES_SUMMARY = [
+  "`mashay process` exits 0 when every document builds and non-zero on any failure. Per-document failures are isolated — one bad document is reported to stderr but never stops the rest of a batch. Setup problems (unknown template/theme, missing input, uncreatable output directory) abort the whole run.",
+  "",
+  "When a batch fails, the exit code is the specific code below if every failure shares one kind, or 30 (mixed) if they differ — the full per-document breakdown is always printed regardless.",
+  "",
+  ...EXIT_CODE_TABLE.map(
+    (e) => `${String(e.code).padStart(3)}  ${e.description}`,
+  ),
+].join("\n");
 
 // Kept in sync with .claude/skills/using-mashay/SKILL.md — update both when
 // pipeline behavior (frontmatter fields, alert markers, Obsidian syntax, etc.) changes.
@@ -118,5 +130,10 @@ export const FORMATTING_TOPICS: FormattingTopic[] = [
     title: "Formatting constraints",
     summary:
       "Tables, strikethrough, autolinks, and task lists (GitHub-flavored Markdown) are all supported. Raw HTML embedded in the Markdown is rendered through — inline (e.g. <span>) and block-level elements both pass into the output.",
+  },
+  {
+    id: "exit-codes",
+    title: "CLI exit codes",
+    summary: EXIT_CODES_SUMMARY,
   },
 ];

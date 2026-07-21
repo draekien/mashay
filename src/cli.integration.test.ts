@@ -7,6 +7,31 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 const execFileAsync = promisify(execFile);
 
+async function runCli(
+  args: string[],
+): Promise<{ code: number; stdout: string; stderr: string }> {
+  try {
+    const { stdout, stderr } = await execFileAsync("node", [CLI, ...args]);
+    return { code: 0, stdout, stderr };
+  } catch (err) {
+    const e = err as { code?: number; stdout?: string; stderr?: string };
+    return {
+      code: e.code ?? 1,
+      stdout: e.stdout ?? "",
+      stderr: e.stderr ?? "",
+    };
+  }
+}
+
+async function fileExists(p: string): Promise<boolean> {
+  try {
+    await readFile(p);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // This exercises the real built CLI (dist/cli.js) rather than importing src/lib/build.ts
 // directly: PACKAGE_ROOT/TEMPLATE_DIR are resolved via import.meta.dirname relative to the
 // bundled file's location, so template loading only resolves correctly once bundled.
@@ -86,5 +111,78 @@ describe("built CLI end-to-end", () => {
       "utf8",
     );
     expect(html).toMatchSnapshot();
+  });
+});
+
+describe("per-file error isolation and exit codes", () => {
+  let srcDir: string;
+
+  beforeEach(async () => {
+    srcDir = await mkdtemp(path.join(tmpdir(), "mashay-src-test-"));
+  });
+
+  afterEach(async () => {
+    await rm(srcDir, { recursive: true, force: true });
+  });
+
+  it("isolates a bad document from the rest of a batch", async () => {
+    await writeFile(path.join(srcDir, "good.md"), "## Ok\n\nFine.\n");
+    await writeFile(
+      path.join(srcDir, "bad.md"),
+      "---\ntitle: 123\n---\n\n## Nope\n",
+    );
+
+    const { code, stderr } = await runCli(["process", srcDir, "--out", outDir]);
+
+    expect(await fileExists(path.join(outDir, "good.html"))).toBe(true);
+    expect(await fileExists(path.join(outDir, "bad.html"))).toBe(false);
+    expect(stderr).toContain("invalid frontmatter");
+    // single failure kind (frontmatter) → its specific code
+    expect(code).toBe(20);
+  });
+
+  it("exits 30 (mixed) when a batch fails with more than one kind", async () => {
+    await writeFile(path.join(srcDir, "good.md"), "## Ok\n\nFine.\n");
+    await writeFile(
+      path.join(srcDir, "bad-fm.md"),
+      "---\ntitle: 123\n---\n\n## Nope\n",
+    );
+    await writeFile(
+      path.join(srcDir, "bad-logo.md"),
+      "---\nlogo: does-not-exist.svg\n---\n\n## Nope\n",
+    );
+
+    const { code } = await runCli(["process", srcDir, "--out", outDir]);
+
+    expect(await fileExists(path.join(outDir, "good.html"))).toBe(true);
+    expect(code).toBe(30);
+  });
+
+  it("exits 10 for an unknown template", async () => {
+    await writeFile(path.join(srcDir, "good.md"), "## Ok\n\nFine.\n");
+
+    const { code, stderr } = await runCli([
+      "process",
+      srcDir,
+      "--out",
+      outDir,
+      "--template",
+      "nope",
+    ]);
+
+    expect(stderr).toContain('unknown template "nope"');
+    expect(code).toBe(10);
+  });
+
+  it("exits 12 when the source path has no markdown", async () => {
+    const { code } = await runCli(["process", srcDir, "--out", outDir]);
+    expect(code).toBe(12);
+  });
+
+  it("documents the exit-code taxonomy via `mashay docs exit-codes`", async () => {
+    const { stdout, code } = await runCli(["docs", "exit-codes"]);
+    expect(code).toBe(0);
+    expect(stdout).toContain("30");
+    expect(stdout).toContain("mixed");
   });
 });

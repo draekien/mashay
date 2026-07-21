@@ -14,7 +14,13 @@ import {
 } from "@clack/prompts";
 import chalk from "chalk";
 import { Command } from "commander";
-import { type BuildResult, buildDocuments } from "./lib/build.js";
+import { type BuildSummary, buildDocuments } from "./lib/build.js";
+import {
+  aggregateExitCode,
+  BuildError,
+  EXIT_UNEXPECTED,
+  exitCodeForKind,
+} from "./lib/errors.js";
 import {
   findMarkdownFilesRecursive,
   resolveMarkdownFiles,
@@ -74,10 +80,15 @@ program
         await runInteractive(opts.out, opts.template, theme);
       }
     } catch (err) {
-      console.error(
-        chalk.red(err instanceof Error ? err.message : String(err)),
-      );
-      process.exitCode = 1;
+      if (err instanceof BuildError) {
+        console.error(chalk.red(err.message));
+        process.exitCode = exitCodeForKind(err.kind);
+      } else {
+        console.error(
+          chalk.red(err instanceof Error ? err.message : String(err)),
+        );
+        process.exitCode = EXIT_UNEXPECTED;
+      }
     }
   });
 
@@ -90,8 +101,11 @@ async function runDirect(
   const srcPath = path.resolve(process.cwd(), src);
   const outDir = path.resolve(process.cwd(), out);
   const files = await resolveMarkdownFiles(srcPath);
-  const results = await buildDocuments(files, outDir, { template, theme });
-  reportResults(results);
+  if (files.length === 0) {
+    throw new BuildError("no-input", `no .md files found in ${src}`);
+  }
+  const summary = await buildDocuments(files, outDir, { template, theme });
+  reportResults(summary);
 }
 
 async function runInteractive(
@@ -141,22 +155,27 @@ async function runInteractive(
 
   const s = spinner();
   s.start("Building documents");
-  const results = await buildDocuments(selected as string[], outDir, {
+  const summary = await buildDocuments(selected as string[], outDir, {
     template,
     theme,
   });
   s.stop("Build complete");
 
-  reportResults(results);
+  reportResults(summary);
+  const built = summary.results.length;
+  const failed = summary.failures.length;
+  const where = path.relative(cwd, outDir) || ".";
   outro(
-    chalk.green(
-      `${results.length} document${results.length === 1 ? "" : "s"} written to ${path.relative(cwd, outDir) || "."}`,
-    ),
+    failed > 0
+      ? chalk.yellow(`${built} built, ${failed} failed → ${where}`)
+      : chalk.green(
+          `${built} document${built === 1 ? "" : "s"} written to ${where}`,
+        ),
   );
 }
 
-function reportResults(results: BuildResult[]): void {
-  for (const r of results) {
+function reportResults(summary: BuildSummary): void {
+  for (const r of summary.results) {
     for (const outName of r.outNames) {
       const isHtml = outName.endsWith(".html");
       console.log(
@@ -164,6 +183,12 @@ function reportResults(results: BuildResult[]): void {
         outName + (isHtml && r.hasMermaid ? chalk.dim(" (+ mermaid)") : ""),
       );
     }
+  }
+  for (const f of summary.failures) {
+    console.error(chalk.red("failed"), f.message);
+  }
+  if (summary.failures.length > 0) {
+    process.exitCode = aggregateExitCode(summary.failures.map((f) => f.kind));
   }
 }
 
