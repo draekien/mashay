@@ -49,7 +49,7 @@ async function build() {
   const start = Date.now();
   try {
     await run("pnpm run build");
-    await run("node dist/cli.js examples --out out");
+    await run("node dist/cli.js process examples --out out");
     console.log(`rebuilt in ${Date.now() - start}ms`);
     notifyReload();
   } catch {

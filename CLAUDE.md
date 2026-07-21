@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `pnpm run build` — typecheck + rolldown bundle to `dist/cli.js`
 - `pnpm run build:examples` — build the CLI, then run it against `examples/` → `out/` (HTML)
 - `pnpm run dev` — local dev runner (`scripts/dev.mjs`)
-- Conversion is the CLI's default action (no subcommand): `mashay [src] [--out <dir>] [--template <name>] [--theme <name>]`. `src` given → build directly; omitted → interactive file picker. `mashay docs [topic]` explores the Markdown formatting rules.
+- Conversion is the `process` subcommand: `mashay process [src] [--out <dir>] [--template <name>] [--theme <name>]`. `src` given → build directly; omitted → interactive file picker. Bare `mashay` (no subcommand) prints help. `mashay docs [topic]` explores the Markdown formatting rules.
 - `pnpm lint` / `pnpm lint:fix` — biome check (double quotes, 2-space indent, import organizing)
 - `pnpm run release` — `commit-and-tag-version`: bumps `package.json` version from conventional commits since the last tag, writes `CHANGELOG.md`, commits + tags. Does not push or publish.
 - Publish flow: `pnpm run release` → `git push --follow-tags origin main` → `pnpm publish` (the `prepublishOnly` script runs `pnpm run build` automatically).

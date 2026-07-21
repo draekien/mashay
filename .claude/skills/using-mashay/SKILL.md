@@ -9,13 +9,13 @@ mashay converts Markdown into self-contained, styled HTML files. It has two halv
 
 ## Invoking the CLI
 
-Package `@draekien/mashay` (published public on npm), binary name `mashay`. Conversion is the default action — there is no subcommand. Run it via `npx @draekien/mashay [src] [--out <dir>] [--template <name>] [--theme <name>]`, or install it (globally or as a project dev dependency) and invoke `mashay` directly.
+Package `@draekien/mashay` (published public on npm), binary name `mashay`. Conversion is the `process` subcommand. Run it via `npx @draekien/mashay process [src] [--out <dir>] [--template <name>] [--theme <name>]`, or install it (globally or as a project dev dependency) and invoke `mashay process` directly. Bare `mashay` with no subcommand prints help.
 
 `mashay --version` prints the CLI version — useful for checking which release `npx` resolved.
 
 `[src]` is a single `.md` file or a directory of `.md` files — direct mode reads only that directory's top level, not subdirectories. `--out` defaults to `out` relative to the current working directory.
 
-Run `mashay` with no `[src]` to get interactive mode: it recursively scans the current directory for `.md` files (skipping `node_modules`, `.git`, `dist`, `out`, and any dotfiles/dot-directories), groups them by folder, and prompts for a multi-select and an output directory.
+Run `mashay process` with no `[src]` to get interactive mode: it recursively scans the current directory for `.md` files (skipping `node_modules`, `.git`, `dist`, `out`, and any dotfiles/dot-directories), groups them by folder, and prompts for a multi-select and an output directory.
 
 `--template <name>` chooses the HTML skeleton + its styling (default `academic`), `--theme <name>` chooses the colour palette (defaults to the template name). A template is `templates/<name>/template.html` plus a colocated `templates/<name>/template.css` (component styling, non-colour tokens, and prose mappings); a theme is `themes/<name>/theme.css` containing **colour tokens only** — a standardized `--color-*` set every template shares, so any theme pairs with any template. One of each ships (`academic`) and they pair by default, but you can mix and match. An unknown template or theme name errors with the list of available names. At build time Tailwind v4 + `@tailwindcss/typography` compile only the used CSS and inline it into a single `<style>`.
 
@@ -130,4 +130,4 @@ mashay is often run directly against a Markdown file exported from (or still liv
 ### Formatting constraints
 
 - Tables, strikethrough, autolinks, and task lists (GitHub-flavored Markdown) are all supported.
-- Raw HTML embedded in the Markdown is not rendered — stick to Markdown/GFM syntax for anything that needs to appear in the output.
+- Raw HTML embedded in the Markdown is rendered through — both inline (e.g. `<span>`) and block-level elements pass into the output.

@@ -117,6 +117,6 @@ export const FORMATTING_TOPICS: FormattingTopic[] = [
     id: "constraints",
     title: "Formatting constraints",
     summary:
-      "Tables, strikethrough, autolinks, and task lists (GitHub-flavored Markdown) are all supported. Raw HTML embedded in the Markdown is not rendered — stick to Markdown/GFM syntax for anything that needs to appear in the output.",
+      "Tables, strikethrough, autolinks, and task lists (GitHub-flavored Markdown) are all supported. Raw HTML embedded in the Markdown is rendered through — inline (e.g. <span>) and block-level elements both pass into the output.",
   },
 ];

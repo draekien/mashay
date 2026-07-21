@@ -1,4 +1,5 @@
 import rehypeHighlight from "rehype-highlight";
+import rehypeRaw from "rehype-raw";
 import rehypeSlug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
 import remarkGfm from "remark-gfm";
@@ -19,7 +20,9 @@ export const processor = unified()
   .use(remarkAlerts)
   .use(remarkObsidianEmbeds)
   .use(remarkObsidianInline)
-  .use(remarkRehype)
+  // allowDangerousHtml keeps raw HTML as `raw` nodes; rehypeRaw (below) reparses
+  // them into real hast so inline HTML in the Markdown renders.
+  .use(remarkRehype, { allowDangerousHtml: true })
   .use(rehypeSlug)
   .use(rehypeHeadingNumbering)
   .use(rehypeMermaid)
@@ -28,4 +31,7 @@ export const processor = unified()
   .use(rehypeHighlight)
   .use(rehypeCodeBlock)
   .use(rehypeAppendix)
+  // Runs last so raw-HTML reparsing doesn't strip the fence `meta` (filename)
+  // that rehypeCodeBlock reads, nor the ids/numbering added upstream.
+  .use(rehypeRaw)
   .use(rehypeStringify);

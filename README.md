@@ -8,16 +8,17 @@ with all styles (and any logo) inlined, ready to share or email.
 Run it from anywhere without installing anything permanently:
 
 ```bash
-npx @draekien/mashay [src] [--out <dir>] [--template <name>] [--theme <name>]
+npx @draekien/mashay process [src] [--out <dir>] [--template <name>] [--theme <name>]
 ```
 
-Conversion is the default action, so there's no subcommand. `[src]` is a single
-`.md` file or a directory of `.md` files; give it and mashay builds directly.
-Omit it and mashay drops into an interactive multi-select file picker.
+Conversion is the `process` subcommand. `[src]` is a single `.md` file or a
+directory of `.md` files; give it and mashay builds directly. Omit it and mashay
+drops into an interactive multi-select file picker. Running bare `mashay` with
+no subcommand prints help.
 
 ```bash
-npx @draekien/mashay ./my-doc.md
-npx @draekien/mashay ./docs --out ./html
+npx @draekien/mashay process ./my-doc.md
+npx @draekien/mashay process ./docs --out ./html
 ```
 
 With no source path, mashay recursively scans the current directory for `.md`
@@ -25,7 +26,7 @@ files, groups them by folder, and lets you multi-select which ones to build and
 set the output directory:
 
 ```bash
-npx @draekien/mashay
+npx @draekien/mashay process
 ```
 
 Each `<file>.md` becomes `<file>.html` in the output directory. `--out`
@@ -66,8 +67,8 @@ pnpm add -D @draekien/mashay
 Then invoke it directly:
 
 ```bash
-mashay [src] [--out <dir>] [--template <name>] [--theme <name>]
-mashay
+mashay process [src] [--out <dir>] [--template <name>] [--theme <name>]
+mashay process
 ```
 
 ## Templates and themes
@@ -89,7 +90,7 @@ Select them with `--template <name>` (default `academic`) and `--theme <name>`
 named `academic`; they pair by default, but you can mix and match:
 
 ```bash
-mashay ./my-doc.md --template academic --theme academic
+mashay process ./my-doc.md --template academic --theme academic
 ```
 
 Unknown template or theme names error with the list of available names. The

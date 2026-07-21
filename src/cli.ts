@@ -43,6 +43,16 @@ program
   .name("mashay")
   .description("Convert Markdown into self-contained, styled HTML documents")
   .version(version)
+  // Bare `mashay` (no subcommand) prints help; conversion lives under `process`.
+  .action(() => {
+    program.help();
+  });
+
+program
+  .command("process")
+  .description(
+    "Convert Markdown to HTML (omit [src] to pick files interactively)",
+  )
   .argument(
     "[src]",
     "markdown file or directory to build (omit to pick files interactively)",
@@ -53,8 +63,8 @@ program
     "--theme <name>",
     "theme to style with (defaults to the template name)",
   )
-  // Bare `mashay` (no src, no subcommand) drops into interactive file-picking;
-  // `mashay <src>` builds directly.
+  // `mashay process <src>` builds directly; `mashay process` (no src) drops into
+  // interactive file-picking.
   .action(async (src: string | undefined, opts: BuildFlags) => {
     const theme = opts.theme ?? opts.template;
     try {

@@ -35,7 +35,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "pnpm typecheck && rolldown -c rolldown.config.mjs",
-    "build:examples": "pnpm build && node dist/cli.js examples --out out",
+    "build:examples": "pnpm build && node dist/cli.js process examples --out out",
     "dev": "node scripts/dev.mjs",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",

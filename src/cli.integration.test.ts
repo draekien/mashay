@@ -36,7 +36,7 @@ describe("built CLI end-to-end", () => {
   });
 
   it("renders the example fixture to a self-contained HTML file", async () => {
-    await execFileAsync("node", [CLI, FIXTURE, "--out", outDir]);
+    await execFileAsync("node", [CLI, "process", FIXTURE, "--out", outDir]);
 
     const html = await readFile(path.join(outDir, "example.html"), "utf8");
 
@@ -50,7 +50,13 @@ describe("built CLI end-to-end", () => {
       '---\nchangelog:\n  - version: "1.0"\n    description: Initial version.\n---\n\n## Just a heading\n\nSome text.\n',
     );
 
-    await execFileAsync("node", [CLI, plainFixture, "--out", outDir]);
+    await execFileAsync("node", [
+      CLI,
+      "process",
+      plainFixture,
+      "--out",
+      outDir,
+    ]);
 
     const html = await readFile(path.join(outDir, "plain.html"), "utf8");
     expect(html).not.toContain("cdn.jsdelivr.net/npm/mermaid");
@@ -60,14 +66,20 @@ describe("built CLI end-to-end", () => {
     const noChangelog = path.join(outDir, "no-changelog.md");
     await writeFile(noChangelog, "## Just a heading\n\nSome text.\n");
 
-    await execFileAsync("node", [CLI, noChangelog, "--out", outDir]);
+    await execFileAsync("node", [CLI, "process", noChangelog, "--out", outDir]);
 
     const html = await readFile(path.join(outDir, "no-changelog.html"), "utf8");
     expect(html).not.toContain("Revision History");
   });
 
   it("renders the Obsidian-vault-style fixture (wikilinks, embeds, callouts, highlights) to self-contained HTML", async () => {
-    await execFileAsync("node", [CLI, OBSIDIAN_FIXTURE, "--out", outDir]);
+    await execFileAsync("node", [
+      CLI,
+      "process",
+      OBSIDIAN_FIXTURE,
+      "--out",
+      outDir,
+    ]);
 
     const html = await readFile(
       path.join(outDir, "example-obsidian.html"),

@@ -1334,24 +1334,24 @@ body {
 <p>A summary callout using an Obsidian-only alias.</p>
 </div>
 <p>This is <mark>important</mark> and has a comment.  It also has a block ref.</p>
-<table>
-<thead>
-<tr>
-<th>Term</th>
-<th>Related</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Plain</td>
-<td>Related Note</td>
-</tr>
-<tr>
-<td>Aliased</td>
-<td>Alias</td>
-</tr>
-</tbody>
-</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Term</th><th>Related</th></tr></thead><tbody><tr><td>Plain</td><td>Related Note</td></tr><tr><td>Aliased</td><td>Alias</td></tr></tbody></table>
       </article>
     </main>
   </div>
@@ -2757,32 +2757,32 @@ body {
 </code></pre></div>
 <h3 id="immersion-methods"><span class="heading-number">3.2. </span>Immersion methods</h3>
 <p>Grounds steep in a fixed volume of water, then the two are separated. French press and cupping bowls work this way.</p>
-<table>
-<thead>
-<tr>
-<th>Method</th>
-<th>Grind</th>
-<th>Time</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Pour-over</td>
-<td>Medium</td>
-<td>3 min</td>
-</tr>
-<tr>
-<td>French press</td>
-<td>Coarse</td>
-<td>4 min</td>
-</tr>
-<tr>
-<td>Espresso</td>
-<td>Fine</td>
-<td>30 sec</td>
-</tr>
-</tbody>
-</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Method</th><th>Grind</th><th>Time</th></tr></thead><tbody><tr><td>Pour-over</td><td>Medium</td><td>3 min</td></tr><tr><td>French press</td><td>Coarse</td><td>4 min</td></tr><tr><td>Espresso</td><td>Fine</td><td>30 sec</td></tr></tbody></table>
 <blockquote>
 <p>A good cup is repeatable — write down what you did, or you are only guessing.</p>
 </blockquote>
