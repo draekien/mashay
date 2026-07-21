@@ -44,6 +44,7 @@ lefthook runs on pre-commit: `pnpm typecheck`, then `biome check --write` on sta
 
 - `.claude/skills/using-mashay/SKILL.md` documents CLI usage and Markdown authoring rules for agents encountering this repo cold. When CLI behavior changes (frontmatter fields, CLI flags/args, template/theme model, TOC/appendix/heading-numbering rules, alert blockquote markers, Mermaid handling), update this skill in the same change so it doesn't drift from actual behavior.
 - `src/lib/formatting-docs.ts` backs the `mashay docs` CLI command and mirrors this skill's rules — update both together.
+- The skill is distributed standalone via `npx skills`, so its body must reference only files bundled under the skill directory (`assets/`), never repo-relative paths like `../../../examples/`. `.claude/skills/using-mashay/assets/example.md` and `assets/example-obsidian.md` are copies of `examples/example.md` and `examples/example-obsidian.md` — keep them in sync when the examples change.
 
 ## Gotchas
 

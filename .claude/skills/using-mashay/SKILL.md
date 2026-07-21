@@ -17,7 +17,7 @@ Package `@draekien/mashay` (published public on npm), binary name `mashay`. Conv
 
 Run `mashay process` with no `[src]` to get interactive mode: it recursively scans the current directory for `.md` files (skipping `node_modules`, `.git`, `dist`, `out`, and any dotfiles/dot-directories), groups them by folder, and prompts for a multi-select and an output directory.
 
-`--template <name>` chooses the HTML skeleton + its styling (default `academic`), `--theme <name>` chooses the colour palette (defaults to the template name). A template is `templates/<name>/template.html` plus a colocated `templates/<name>/template.css` (component styling, non-colour tokens, and prose mappings); a theme is `themes/<name>/theme.css` containing **colour tokens only** — a standardized `--color-*` set every template shares, so any theme pairs with any template. One of each ships (`academic`) and they pair by default, but you can mix and match. An unknown template or theme name errors with the list of available names. At build time Tailwind v4 + `@tailwindcss/typography` compile only the used CSS and inline it into a single `<style>`.
+`--template <name>` chooses the HTML skeleton + its styling (default `academic`), `--theme <name>` chooses the colour palette (defaults to the template name). A template is `templates/<name>/template.html` plus a colocated `templates/<name>/template.css` (component styling, non-colour tokens, and prose mappings); a theme is `themes/<name>/theme.css` containing **colour tokens only** — a standardized `--color-*` set every template shares, so any theme pairs with any template. They pair by default but mix and match freely; an unknown template or theme name errors with the list of available names — rely on that list to see what's installed rather than assuming a fixed set. At build time Tailwind v4 + `@tailwindcss/typography` compile only the used CSS and inline it into a single `<style>`.
 
 When building a batch, a failing document doesn't abort the run — the rest still build, each failure prints to stderr, and the process exit code encodes what went wrong (0 success; 10-13 setup errors like an unknown template/theme or missing input; 20-23 per-document errors like bad frontmatter or a missing logo; 30 when a batch fails with more than one distinct kind). Run `mashay docs exit-codes` for the full table.
 
@@ -27,7 +27,7 @@ Each `<file>.md` becomes `<file>.html` in the output directory. The HTML is full
 
 ## Authoring a Markdown file mashay can convert
 
-[examples/example.md](../../../examples/example.md) is a complete working example — a neutral "A Field Guide to Coffee Brewing" sample exercising every feature — and [examples/example-obsidian.md](../../../examples/example-obsidian.md) covers the Obsidian syntax. Read them alongside the rules below rather than inferring syntax from scratch. [assets/example.md](assets/example.md) mirrors the main example for skills installed standalone.
+[assets/example.md](assets/example.md) is a complete working example — a neutral "A Field Guide to Coffee Brewing" sample exercising every feature — and [assets/example-obsidian.md](assets/example-obsidian.md) covers the Obsidian syntax. Read them alongside the rules below rather than inferring syntax from scratch.
 
 ### Frontmatter
 
@@ -89,7 +89,7 @@ flowchart LR
 ```
 ````
 
-Diagrams render client-side and are click-to-zoom (opens a lightbox on click). The Mermaid renderer script is only inlined into files that actually contain a mermaid code block.
+Diagrams render client-side and are click-to-zoom (opens a lightbox on click). A `<script>` tag referencing the Mermaid CDN renderer is added only to files that actually contain a mermaid code block — the renderer's code itself is never inlined, so those files need internet access at view time (the one exception to mashay's self-contained output).
 
 ### Appendix section
 

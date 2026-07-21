@@ -71,7 +71,7 @@ export const FORMATTING_TOPICS: FormattingTopic[] = [
     id: "mermaid",
     title: "Mermaid diagrams",
     summary:
-      "Diagrams render client-side and are click-to-zoom (opens a lightbox on click). The Mermaid renderer script is only inlined into files that actually contain a mermaid code block — a document with a diagram needs internet access at view time, since the renderer loads from a CDN rather than being inlined.",
+      "Diagrams render client-side and are click-to-zoom (opens a lightbox on click). A <script> tag referencing the Mermaid CDN renderer is added only to files that actually contain a mermaid code block — the renderer's code itself is never inlined, so a document with a diagram needs internet access at view time (the one exception to mashay's self-contained output).",
     example: "```mermaid\nflowchart LR\n    A[Start] --> B[End]\n```",
   },
   {
