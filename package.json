@@ -1,6 +1,6 @@
 {
   "name": "@draekien/mashay",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Convert Markdown into self-contained, styled HTML documents",
   "keywords": [
     "markdown",
