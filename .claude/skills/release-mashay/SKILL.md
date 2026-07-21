@@ -1,12 +1,12 @@
 ---
 name: release-mashay
-description: Runs the mashay release and publish pipeline — verifies the tree is clean and green, bumps the version from conventional commits since the last tag, updates CHANGELOG.md, tags the commit, pushes to origin, and publishes mashay to the public npm registry. Use when the user says "release mashay", "cut a release", "publish mashay", "ship a new version", or asks to run the release/publish pipeline.
+description: Runs the mashay release and publish pipeline — verifies the tree is clean and green, bumps the version from conventional commits since the last tag, updates CHANGELOG.md, tags the commit, pushes to origin, and publishes @draekien/mashay to the public npm registry. Use when the user says "release mashay", "cut a release", "publish mashay", "ship a new version", or asks to run the release/publish pipeline.
 argument-hint: "[--dry-run]"
 ---
 
 # Release mashay
 
-This pipeline's last two steps push a tag to the shared `origin` remote and publish a new version of `mashay` to the public npm registry other projects install from. Both are irreversible — a pushed tag is shared history, and a published version can't be silently replaced. Treat every irreversible step from `git push` onward as needing explicit confirmation, even if the version bump and changelog step ran without asking.
+This pipeline's last two steps push a tag to the shared `origin` remote and publish a new version of `@draekien/mashay` to the public npm registry other projects install from. Both are irreversible — a pushed tag is shared history, and a published version can't be silently replaced. Treat every irreversible step from `git push` onward as needing explicit confirmation, even if the version bump and changelog step ran without asking.
 
 If the user invoked this skill asking only for a `--dry-run` preview, run just the dry-run in step 1, show the output, and stop — do not proceed to steps 2–4.
 
@@ -26,7 +26,7 @@ Run in order — this sequence is fragile and each step assumes the last one suc
 1. **Bump and changelog**: `pnpm run release`. This runs `commit-and-tag-version`, which bumps `package.json`, writes `CHANGELOG.md`, and creates a commit + tag locally — nothing leaves the machine yet. To preview the bump and changelog without committing (useful when the preflight commit log looked ambiguous), run `pnpm run release -- --dry-run` first and read its output before deciding whether to proceed for real.
 2. **Review the result**: check the new version number and the generated `CHANGELOG.md` entry are what you expect. This is the last point where undoing anything is cheap (`git reset` locally) — past this point it isn't.
 3. **Confirm, then push**: `git push --follow-tags origin main`. This is the first irreversible step — it publishes the release commit and tag to the shared remote. Confirm with the user before running it, even if they asked for the release.
-4. **Confirm, then publish**: `pnpm publish`. This runs `prepublishOnly` (`pnpm build`) automatically, then uploads the package to the public npm registry. This is irreversible for the same reason as the push — confirm before running it. Only `dist/` and `whitepapers/template` are published (`files` in `package.json`); `prepublishOnly` regenerates `dist/` from source, so a stale local build is not a concern.
+4. **Confirm, then publish**: `pnpm publish`. This runs `prepublishOnly` (`pnpm build`) automatically, then uploads the package to the public npm registry. The package is scoped (`@draekien/mashay`); `publishConfig.access: "public"` in `package.json` makes the scoped publish public, so no `--access public` flag is needed. This is irreversible for the same reason as the push — confirm before running it. Only `dist`, `templates`, and `themes` are published (`files` in `package.json`); `prepublishOnly` regenerates `dist/` from source, so a stale local build is not a concern.
 
 ## Gotchas
 

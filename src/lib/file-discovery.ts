@@ -9,6 +9,7 @@ export async function resolveMarkdownFiles(srcPath: string): Promise<string[]> {
     const entries = await readdir(srcPath);
     return entries
       .filter((f) => f.endsWith(".md"))
+      .sort((a, b) => a.localeCompare(b))
       .map((f) => path.join(srcPath, f));
   }
 
@@ -26,7 +27,9 @@ export const SKIP_DIRS = new Set(["node_modules", ".git", "dist", "out"]);
 export async function findMarkdownFilesRecursive(
   root: string,
 ): Promise<string[]> {
-  const entries = await readdir(root, { withFileTypes: true });
+  const entries = (await readdir(root, { withFileTypes: true })).sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
   const results: string[] = [];
 
   for (const entry of entries) {

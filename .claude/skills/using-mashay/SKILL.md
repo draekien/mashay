@@ -1,66 +1,68 @@
 ---
 name: using-mashay
-description: Explains how to invoke the mashay CLI and how to author whitepaper Markdown it can process — frontmatter, heading numbering, alert blockquotes, Mermaid diagrams, the Appendix section, Obsidian-vault syntax (wikilinks, embeds, callouts, highlights, comments, block references), and the `mashay docs` command for exploring these rules interactively. Use when building or running the mashay whitepaper pipeline, adding or editing a whitepaper Markdown source file — especially one sourced from an Obsidian vault — or when the user says "build the whitepaper", "add a new whitepaper", "run mashay", "mashay docs", or asks about whitepaper frontmatter, TOC, alert blockquotes, appendix syntax, wikilinks, or embeds.
+description: Explains how to invoke the mashay CLI and how to author Markdown it can convert to self-contained styled HTML — frontmatter, template/theme selection, heading numbering, alert blockquotes, Mermaid diagrams, the Appendix section, Obsidian-vault syntax (wikilinks, embeds, callouts, highlights, comments, block references), and the `mashay docs` command for exploring these rules interactively. Use when converting Markdown with mashay, adding or editing a Markdown source file — especially one sourced from an Obsidian vault — or when the user says "build the docs", "convert this markdown", "run mashay", "mashay docs", or asks about mashay frontmatter, templates, themes, TOC, alert blockquotes, appendix syntax, wikilinks, or embeds.
 ---
 
-# Build whitepapers with mashay
+# Convert Markdown with mashay
 
-mashay converts Markdown whitepapers into self-contained, styled HTML files. It has two halves: invoking the CLI, and writing Markdown the CLI's pipeline understands.
+mashay converts Markdown into self-contained, styled HTML files. It has two halves: invoking the CLI, and writing Markdown the CLI's pipeline understands.
 
 ## Invoking the CLI
 
-Package `mashay`, binary name `mashay`. The whitepaper pipeline lives under the `whitepaper` subcommand: run it via `npx mashay whitepaper <src-file-or-dir> [--out <dir>]`, or install it globally (or as a project dependency) and invoke `mashay whitepaper` directly. Bare `mashay` just prints the command list.
+Package `@draekien/mashay` (published public on npm), binary name `mashay`. Conversion is the default action — there is no subcommand. Run it via `npx @draekien/mashay [src] [--out <dir>] [--template <name>] [--theme <name>]`, or install it (globally or as a project dev dependency) and invoke `mashay` directly.
 
 `mashay --version` prints the CLI version — useful for checking which release `npx` resolved.
 
-`<src>` is a single `.md` file or a directory of `.md` files — direct mode reads only that directory's top level, not subdirectories. `--out` defaults to `./out` relative to the current working directory.
+`[src]` is a single `.md` file or a directory of `.md` files — direct mode reads only that directory's top level, not subdirectories. `--out` defaults to `out` relative to the current working directory.
 
-Run `mashay whitepaper` with no `<src>` to get interactive mode: it recursively scans the current directory for `.md` files (skipping `node_modules`, `.git`, `dist`, `out`, and any dotfiles/dot-directories), groups them by folder, and prompts for a multi-select and an output directory.
+Run `mashay` with no `[src]` to get interactive mode: it recursively scans the current directory for `.md` files (skipping `node_modules`, `.git`, `dist`, `out`, and any dotfiles/dot-directories), groups them by folder, and prompts for a multi-select and an output directory.
+
+`--template <name>` chooses the HTML skeleton + its styling (default `academic`), `--theme <name>` chooses the colour palette (defaults to the template name). A template is `templates/<name>/template.html` plus a colocated `templates/<name>/template.css` (component styling, non-colour tokens, and prose mappings); a theme is `themes/<name>/theme.css` containing **colour tokens only** — a standardized `--color-*` set every template shares, so any theme pairs with any template. One of each ships (`academic`) and they pair by default, but you can mix and match. An unknown template or theme name errors with the list of available names. At build time Tailwind v4 + `@tailwindcss/typography` compile only the used CSS and inline it into a single `<style>`.
 
 Run `mashay docs` for an interactive browser of every formatting rule and supported syntax topic (frontmatter, headings, alerts, mermaid, appendix, code blocks, and each Obsidian syntax feature) — or `mashay docs <topic>` (e.g. `mashay docs alerts`) to print one topic directly without prompts. The rules below are the same content this command serves; treat that command as the fluent/interactive way to explore them and this document as the reference to keep in sync (`src/lib/formatting-docs.ts` is the source of truth the command reads from).
 
-Each `<file>.md` becomes `<file>.html` in the output directory. The HTML is fully self-contained (styles, and any configured logo, inlined) — with one exception: a whitepaper containing a Mermaid diagram needs internet access at *view* time, since the Mermaid renderer loads from a CDN rather than being inlined into every file.
+Each `<file>.md` becomes `<file>.html` in the output directory. The HTML is fully self-contained (styles, and any configured logo, inlined) — with one exception: a document containing a Mermaid diagram needs internet access at *view* time, since the Mermaid renderer loads from a CDN rather than being inlined into every file.
 
-## Authoring a compliant whitepaper Markdown file
+## Authoring a Markdown file mashay can convert
 
-[assets/example-whitepaper.md](assets/example-whitepaper.md) is a complete working example — read it alongside the rules below rather than inferring syntax from scratch.
+[examples/example.md](../../../examples/example.md) is a complete working example — a neutral "A Field Guide to Coffee Brewing" sample exercising every feature — and [examples/example-obsidian.md](../../../examples/example-obsidian.md) covers the Obsidian syntax. Read them alongside the rules below rather than inferring syntax from scratch. [assets/example.md](assets/example.md) mirrors the main example for skills installed standalone.
 
 ### Frontmatter
 
 ```yaml
 ---
-title: Streamlining Property Due Diligence
-description: How automation reduces settlement risk for conveyancers.
+title: A Field Guide to Coffee Brewing
+description: How grind size, water, and time shape a cup.
 author: Jane Researcher
 logo: logo.svg
 date: 2026-07-13
 status: Draft
-version: "1.0"
+version: "1.1"
 reviewers:
   - Jane Doe
   - John Smith
-classification: Internal
+classification: Public
 changelog:
-  - version: "1.0"
+  - version: "1.1"
     date: 2026-07-13
     description: Initial release.
 ---
 ```
 
-Every field except `changelog` is optional, and unrecognized extra fields pass through without error — but a field of the wrong shape (e.g. a non-string `title`, or `reviewers` given as a single string instead of a list) fails the build. Omit `title` and the output's `<title>` falls back to the source filename.
+Every field is optional, and unrecognized extra fields pass through without error — but a field of the wrong shape (e.g. a non-string `title`, or `reviewers` given as a single string instead of a list) fails the build. Omit `title` and the output's `<title>` falls back to the source filename.
 
-`status` renders as a small eyebrow line above the document title (a status pill); omit it and the eyebrow falls back to a plain "Whitepaper" label. `version`, `date`, `author`, `reviewers` (comma-joined), and `classification` render as a meta grid below the subtitle, each only appearing when its field is present — the grid itself is omitted entirely when none of the five are set.
+`status` renders as a small eyebrow/badge above the document title; omit it and no eyebrow renders at all. `version`, `date`, `author`, `reviewers` (comma-joined), and `classification` render as a meta grid below the subtitle, each only appearing when its field is present — the grid itself is omitted entirely when none of the five are set.
 
 `logo` is an optional path to an image (SVG, or a raster format such as PNG/JPEG), resolved relative to the Markdown source file. It is inlined into the masthead logo slot — SVGs embedded as-is, raster images as a base64 `data:` URI, keeping the output self-contained. Omit it and the masthead renders with no logo. There is no bundled default logo.
 
-`changelog` is **required** — every whitepaper needs a revision history with at least one entry recording the initial version; a file without one fails the build. It is a list of `{ version, date, description }` entries (`date` and `description` are optional; `version` is required) — each one becomes a row in a "Revision History" disclosure rendered collapsed at the top of the content column, in the order given.
+`changelog` is optional. When present, it is a list of `{ version, date, description }` entries (`date` and `description` are optional; `version` is required) — each one becomes a row in a "Revision History" disclosure rendered collapsed at the top of the content column, in the order given. Omit it entirely and no revision history renders.
 
 ### Headings and numbering
 
 - `#` is reserved for the auto-generated document title — start body sections at `##`.
 - Headings are auto-numbered (`1`, `1.1`, `1.1.1`), resetting deeper counters whenever a shallower heading appears.
 - In the main body, the sidebar TOC only lists `##` and `###` levels; `####` is still numbered but omitted from the TOC — reserve `####` for detail that doesn't need direct navigation. Headings under the Appendix follow a different rule — see below.
-- Anchor links use the heading text slugified (lowercased, hyphenated), ignoring the generated number — link with standard Markdown, e.g. `[see The Problem](#the-problem)`.
+- Anchor links use the heading text slugified (lowercased, hyphenated), ignoring the generated number — link with standard Markdown, e.g. `[see Introduction](#introduction)`.
 
 ### Alert blockquotes
 
@@ -72,7 +74,7 @@ GitHub-style alert blockquotes:
 ```
 
 - Markers group into four visual styles following Obsidian's callout semantics (`important`/`hint` are aliases of `tip`; `caution`/`attention` are aliases of `warning` — only genuinely negative types render as errors). The five GitHub markers map as: `[!NOTE]`, `[!TIP]`, and `[!IMPORTANT]` → info; `[!WARNING]` and `[!CAUTION]` → warn.
-- Obsidian's broader callout vocabulary is also recognized (case-insensitively) — `[!ABSTRACT]`/`[!SUMMARY]`/`[!TLDR]`/`[!INFO]`/`[!TODO]`/`[!HINT]`/`[!EXAMPLE]`/`[!QUOTE]`/`[!CITE]` → info; `[!SUCCESS]`/`[!CHECK]`/`[!DONE]` → success; `[!QUESTION]`/`[!HELP]`/`[!FAQ]`/`[!ATTENTION]` → warn; `[!DANGER]`/`[!ERROR]`/`[!FAILURE]`/`[!FAIL]`/`[!MISSING]`/`[!BUG]` → error. Obsidian's optional trailing fold indicator (`[!TIP]+` or `[!TIP]-` for a collapsible callout) is accepted but ignored — the whitepaper alert box is never collapsible.
+- Obsidian's broader callout vocabulary is also recognized (case-insensitively) — `[!ABSTRACT]`/`[!SUMMARY]`/`[!TLDR]`/`[!INFO]`/`[!TODO]`/`[!HINT]`/`[!EXAMPLE]`/`[!QUOTE]`/`[!CITE]` → info; `[!SUCCESS]`/`[!CHECK]`/`[!DONE]` → success; `[!QUESTION]`/`[!HELP]`/`[!FAQ]`/`[!ATTENTION]` → warn; `[!DANGER]`/`[!ERROR]`/`[!FAILURE]`/`[!FAIL]`/`[!MISSING]`/`[!BUG]` → error. Obsidian's optional trailing fold indicator (`[!TIP]+` or `[!TIP]-` for a collapsible callout) is accepted but ignored — the alert box is never collapsible.
 - The marker must be the first line of the blockquote. Text placed on the same line as the marker (`> [!NOTE] inline detail`) becomes a separate paragraph below the alert title, same as text on the following lines.
 - A blockquote with no recognized marker (GitHub's five or Obsidian's aliases) renders as an ordinary `<blockquote>` — no special styling.
 

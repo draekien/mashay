@@ -10,26 +10,26 @@
   </style>
 </head>
 <body>
-  <header class="whitepaper-header">
-    <span class="logo">{{logo}}</span>
-    <div class="header-eyebrow">{{eyebrow}}</div>
-    <h1>{{title}}</h1>
-    <p class="subtitle">{{description}}</p>
+  <header class="doc-header bg-[var(--color-tertiary-900)] text-[var(--color-neutral-000)] px-8 pt-8 pb-6 border-b-4 border-[var(--color-primary-600)]">
+    <span class="doc-logo">{{logo}}</span>
+    <div class="doc-eyebrow">{{eyebrow}}</div>
+    <h1 class="doc-title">{{title}}</h1>
+    <p class="doc-subtitle">{{description}}</p>
     {{metaGrid}}
   </header>
 
-  <div class="whitepaper-layout">
-    <aside class="whitepaper-toc">{{toc}}</aside>
+  <div class="doc-layout flex flex-col md:flex-row md:items-start gap-8 max-w-[72rem] mx-auto px-8">
+    <aside class="doc-toc md:sticky md:top-8 md:shrink-0 md:grow-0 md:basis-56 md:w-56 md:max-h-[calc(100vh-4rem)] md:overflow-y-auto">{{toc}}</aside>
 
-    <main class="whitepaper">
+    <main class="doc flex-1 min-w-0 max-w-[44rem] py-12">
       {{changelog}}
-      <article class="whitepaper-content">
+      <article class="doc-content prose max-w-none">
         {{content}}
       </article>
     </main>
   </div>
 
-  <footer class="whitepaper-footer">
+  <footer class="doc-footer text-center text-[var(--color-neutral-600)] text-[0.8rem] p-8 border-t border-[var(--color-neutral-300)]">
     <p>Built with mashay</p>
   </footer>
 

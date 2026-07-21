@@ -2,21 +2,21 @@ import { describe, expect, it } from "vitest";
 import { FrontmatterSchema, formatDate } from "./frontmatter.js";
 
 describe("FrontmatterSchema", () => {
-  it("rejects an object with no changelog — a revision history is required", () => {
+  it("accepts an empty object — every field is optional", () => {
     const result = FrontmatterSchema.safeParse({});
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
-  it("accepts changelog-only frontmatter (all other fields are optional)", () => {
+  it("accepts changelog-only frontmatter", () => {
     const result = FrontmatterSchema.safeParse({
       changelog: [{ version: "1.0" }],
     });
     expect(result.success).toBe(true);
   });
 
-  it("rejects an empty changelog list", () => {
+  it("accepts an empty changelog list", () => {
     const result = FrontmatterSchema.safeParse({ changelog: [] });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
   it("accepts all documented fields", () => {

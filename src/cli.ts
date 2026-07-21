@@ -14,7 +14,7 @@ import {
 } from "@clack/prompts";
 import chalk from "chalk";
 import { Command } from "commander";
-import { type BuildResult, buildWhitepapers } from "./lib/build.js";
+import { type BuildResult, buildDocuments } from "./lib/build.js";
 import {
   findMarkdownFilesRecursive,
   resolveMarkdownFiles,
@@ -31,34 +31,37 @@ const { version } = JSON.parse(
   readFileSync(new URL("../package.json", import.meta.url), "utf8"),
 ) as { version: string };
 
+interface BuildFlags {
+  out: string;
+  template: string;
+  theme?: string;
+}
+
 const program = new Command();
 
 program
   .name("mashay")
   .description("Convert Markdown into self-contained, styled HTML documents")
   .version(version)
-  // Bare `mashay` shows the command list; each document type is its own
-  // subcommand so more can be added later without breaking invocations.
-  .action(() => {
-    program.help();
-  });
-
-program
-  .command("whitepaper")
-  .description(
-    "Build Markdown whitepapers into self-contained, styled HTML files",
-  )
   .argument(
     "[src]",
     "markdown file or directory to build (omit to pick files interactively)",
   )
   .option("--out <dir>", "output directory", "out")
-  .action(async (src: string | undefined, opts: { out: string }) => {
+  .option("--template <name>", "template to render with", "academic")
+  .option(
+    "--theme <name>",
+    "theme to style with (defaults to the template name)",
+  )
+  // Bare `mashay` (no src, no subcommand) drops into interactive file-picking;
+  // `mashay <src>` builds directly.
+  .action(async (src: string | undefined, opts: BuildFlags) => {
+    const theme = opts.theme ?? opts.template;
     try {
       if (src) {
-        await runDirect(src, opts.out);
+        await runDirect(src, opts.out, opts.template, theme);
       } else {
-        await runInteractive(opts.out);
+        await runInteractive(opts.out, opts.template, theme);
       }
     } catch (err) {
       console.error(
@@ -68,16 +71,25 @@ program
     }
   });
 
-async function runDirect(src: string, out: string): Promise<void> {
+async function runDirect(
+  src: string,
+  out: string,
+  template: string,
+  theme: string,
+): Promise<void> {
   const srcPath = path.resolve(process.cwd(), src);
   const outDir = path.resolve(process.cwd(), out);
   const files = await resolveMarkdownFiles(srcPath);
-  const results = await buildWhitepapers(files, outDir);
+  const results = await buildDocuments(files, outDir, { template, theme });
   reportResults(results);
 }
 
-async function runInteractive(out: string): Promise<void> {
-  intro(chalk.bold("mashay — whitepaper builder"));
+async function runInteractive(
+  out: string,
+  template: string,
+  theme: string,
+): Promise<void> {
+  intro(chalk.bold("mashay"));
 
   const cwd = process.cwd();
   const files = await findMarkdownFilesRecursive(cwd);
@@ -95,7 +107,7 @@ async function runInteractive(out: string): Promise<void> {
   }
 
   const selected = await groupMultiselect({
-    message: "Select whitepapers to build",
+    message: "Select documents to build",
     options: groups,
     required: true,
   });
@@ -118,14 +130,17 @@ async function runInteractive(out: string): Promise<void> {
   const outDir = path.resolve(cwd, outDirAnswer);
 
   const s = spinner();
-  s.start("Building whitepapers");
-  const results = await buildWhitepapers(selected as string[], outDir);
+  s.start("Building documents");
+  const results = await buildDocuments(selected as string[], outDir, {
+    template,
+    theme,
+  });
   s.stop("Build complete");
 
   reportResults(results);
   outro(
     chalk.green(
-      `${results.length} whitepaper${results.length === 1 ? "" : "s"} written to ${path.relative(cwd, outDir) || "."}`,
+      `${results.length} document${results.length === 1 ? "" : "s"} written to ${path.relative(cwd, outDir) || "."}`,
     ),
   );
 }

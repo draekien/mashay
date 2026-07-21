@@ -1,6 +1,6 @@
 ---
 name: mashay
-description: Self-contained, styled HTML documents built from plain Markdown.
+description: Visual system spec for the academic template and theme — token-driven, self-contained styled HTML from plain Markdown.
 colors:
   header-navy: "#023e5c"
   brand-teal: "#0c7e96"
@@ -74,29 +74,51 @@ components:
     padding: "32px 32px 24px"
 ---
 
-# Design System: mashay
+# Design System: the academic template + theme
 
 ## 1. Overview
 
+This is the visual-system spec for mashay's `academic` template and theme — the
+one template/theme pair that ships today. It is token-driven, and styling is
+split across two colocated layers:
+
+- **`themes/academic/theme.css` — colour tokens only.** A theme is a pure
+  palette: it defines just the standardized `--color-*` custom properties, the
+  token contract every template is written against. A new theme is authored by
+  overriding this same set of names with new values.
+- **`templates/academic/template.css` — everything template-specific.** The
+  non-colour design tokens (`--font-*`, `--spacing-*`, `--radius-*`,
+  `--transition-*`, `--z-*`), the component/structural rules, and the
+  `--tw-prose-*` mappings — all referencing the theme's colour tokens. The
+  template chrome and layout are built from Tailwind utility classes in
+  `template.html` (also referencing the colour tokens), and the Markdown body is
+  styled by `@tailwindcss/typography`'s `prose` classes with those
+  `--tw-prose-*` values re-asserted on top.
+
+Because the colour tokens are standardized, any theme pairs with any template. A
+new template brings its own `template.html` + `template.css`; a new theme only
+retunes the palette.
+
 **Creative North Star: "The Executive Brief"**
 
-Every mashay document is a calm executive briefing: a clear agenda (the sticky
-table of contents), numbered sections, disciplined metadata, and no noise —
-everything in service of a decision. The reader should feel handed a prepared,
-authoritative brief, not a rendered README. Design authority comes from
-structure — numbering, ruled dividers, a branded masthead — never from
+Every academic-themed document is a calm executive briefing: a clear agenda (the
+sticky table of contents), numbered sections, disciplined metadata, and no
+noise — everything in service of a decision. The reader should feel handed a
+prepared, authoritative brief, not a rendered README. Design authority comes
+from structure — numbering, ruled dividers, a branded masthead — never from
 decoration.
 
-The system is a strict application of the design tokens in
-`whitepapers/template/assets/tokens.css`. It explicitly rejects generic SaaS
-marketing (no gradients, no hype), the dry Word-doc export (unstyled walls of
-text), the dev-tool README (monospace-heavy, unstyled), and academic-paper
-austerity. It is a reading surface: a single measured column (max 44rem, ~70ch)
-on white paper, flanked by a quiet navigation rail, opened by a deep-navy
-masthead that carries the entire accent moment.
+The system is a strict application of the design tokens (colours in
+`themes/academic/theme.css`, the rest in `templates/academic/template.css`). It
+explicitly rejects generic SaaS marketing (no
+gradients, no hype), the dry Word-doc export (unstyled walls of text), the
+dev-tool README (monospace-heavy, unstyled), and academic-paper austerity. It
+is a reading surface: a single measured column (max 44rem, ~70ch) on white
+paper, flanked by a quiet navigation rail, opened by a deep-navy masthead that
+carries the entire accent moment.
 
 **Key Characteristics:**
-- Token-only styling — every color, space, radius, and duration is a `var(--*)` reference.
+- Token-only styling — every color, space, radius, and duration is a `var(--*)` reference defined in the theme, so a new theme retunes the whole look by overriding tokens.
 - One saturated accent moment (the navy masthead); the body is calm ink-on-paper.
 - Structure as ornament: numbered heading chips, tabular TOC numerals, ruled section breaks.
 - Flat, border-delineated surfaces; 4px-grid spacing; small radii (2/4/8px).
@@ -224,7 +246,7 @@ shadows.
 - **Do** reference tokens for every value — colors, spacing (4px grid), radii (2/4/8px), transitions. The Token Rule is absolute.
 - **Do** keep the masthead as the single accent-saturated surface; body surfaces stay Paper, Surface, and Rule Line.
 - **Do** keep any masthead logo a light wordmark on the navy masthead, sized to the 2rem slot; the logo is configured per document and inlined, not bundled.
-- **Do** preserve the numbered spine (chips, tabular TOC numerals, lettered appendices) in any new document type.
+- **Do** preserve the numbered spine (chips, tabular TOC numerals, lettered appendices) in any new template or theme.
 - **Do** keep body text at Ink (#1b242d) on Paper — 4.5:1+ contrast; Slate Muted is for metadata only, never paragraphs.
 - **Do** pair every transition with an explicit property and easing (`background var(--transition-fast) ease-in-out`) and a `prefers-reduced-motion: reduce` override.
 

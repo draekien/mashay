@@ -15,11 +15,11 @@ declare module "mdast" {
 // GitHub-style alert blockquotes (> [!NOTE], [!TIP], [!WARNING], [!IMPORTANT], [!CAUTION]) plus
 // Obsidian's broader callout vocabulary (same "> [!type]" syntax, more type names, and an
 // optional trailing +/- fold indicator for its collapsible callouts). Consolidated to four
-// visual styles per the whitepaper template: info, success, warn, error. Style grouping
-// follows Obsidian's semantics rather than GitHub's — important/hint are aliases of tip
-// (info, not error) and caution/attention are aliases of warning (warn, not error) — so
-// only genuinely negative types (danger, error, failure, bug) render red. The fold
-// indicator is accepted but has no effect — the whitepaper alert box is never collapsible.
+// visual styles: info, success, warn, error. Style grouping follows Obsidian's semantics
+// rather than GitHub's — important/hint are aliases of tip (info, not error) and
+// caution/attention are aliases of warning (warn, not error) — so only genuinely negative
+// types (danger, error, failure, bug) render red. The fold indicator is accepted but has
+// no effect — the alert box is never collapsible.
 const ALERT_STYLE: Record<string, string> = {
   note: "info",
   tip: "info",

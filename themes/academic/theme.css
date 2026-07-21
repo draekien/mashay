@@ -1,0 +1,58 @@
+/*
+ * Academic theme — colour tokens.
+ *
+ * A theme is a pure palette. It defines ONLY colour tokens, using the
+ * standardized token contract that every mashay template is written against:
+ * the same custom-property names appear in every theme, and only their values
+ * differ. Swapping `--theme` swaps these values; the template's own CSS
+ * (templates/<name>/template.css) maps them onto components. Any theme can
+ * therefore pair with any template.
+ */
+
+:root {
+  --color-background: #ffffff;
+  --color-text: #1b242d;
+
+  --color-neutral-000: #ffffff;
+  --color-neutral-100: #f8fafb;
+  --color-neutral-200: #f0f3f6;
+  --color-neutral-300: #dbe0e6;
+  --color-neutral-400: #cad1d8;
+  --color-neutral-500: #b3bdc7;
+  --color-neutral-600: #7c8a98;
+  --color-neutral-700: #576575;
+  --color-neutral-1000: #0f1419;
+
+  --color-primary-100: #f2fbfd;
+  --color-primary-400: #90dfef;
+  --color-primary-600: #0c7e96;
+
+  --color-secondary-400: #ffd88a;
+  --color-secondary-500: #fec757;
+  --color-secondary-600: #ffb733;
+  --color-secondary-1000: #2b251c;
+
+  --color-tertiary-400: #a2d0e6;
+  --color-tertiary-500: #6bb9e1;
+  --color-tertiary-700: #066b9d;
+  --color-tertiary-900: #023e5c;
+
+  --color-information-100: #f2fbfd;
+  --color-information-300: #c5edf6;
+  --color-information-800: #034e5e;
+
+  --color-success-100: #f1f9f3;
+  --color-success-300: #ccf0d7;
+  --color-success-800: #006629;
+
+  --color-alert-100: #fcf5ee;
+  --color-alert-300: #fae0c2;
+  --color-alert-800: #b44a04;
+
+  --color-error-100: #fff5f5;
+  --color-error-300: #ffbdbf;
+  --color-error-400: #ff8589;
+  --color-error-800: #a30005;
+
+  --color-overlay: rgba(29, 38, 48, 0.5);
+}

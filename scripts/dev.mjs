@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// Dev-only watch server: rebuilds whitepapers/src -> whitepapers/dist whenever
-// pipeline source or whitepaper source/template files change, and live-reloads
-// any open browser tab via SSE so you don't have to refresh manually.
+// Dev-only watch server: rebuilds examples/ -> out/ whenever pipeline source or
+// example/template/theme files change, and live-reloads any open browser tab via
+// SSE so you don't have to refresh manually.
 import { exec } from "node:child_process";
 import { createReadStream } from "node:fs";
 import { readdir, stat } from "node:fs/promises";
@@ -10,7 +10,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(fileURLToPath(import.meta.url), "..", "..");
-const OUT_DIR = path.join(ROOT, "whitepapers", "dist");
+const OUT_DIR = path.join(ROOT, "out");
 const PORT = Number(process.env.PORT) || 5173;
 
 const RELOAD_SCRIPT = `
@@ -49,9 +49,7 @@ async function build() {
   const start = Date.now();
   try {
     await run("pnpm run build");
-    await run(
-      "node dist/cli.js whitepaper whitepapers/src --out whitepapers/dist",
-    );
+    await run("node dist/cli.js examples --out out");
     console.log(`rebuilt in ${Date.now() - start}ms`);
     notifyReload();
   } catch {
@@ -72,11 +70,7 @@ function scheduleBuild() {
 }
 
 const { watch } = await import("node:fs");
-for (const dir of [
-  "src",
-  path.join("whitepapers", "src"),
-  path.join("whitepapers", "template"),
-]) {
+for (const dir of ["src", "examples", "templates", "themes"]) {
   watch(path.join(ROOT, dir), { recursive: true }, scheduleBuild);
 }
 
@@ -142,8 +136,6 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(
-    `watching for changes — serving whitepapers/dist on http://localhost:${PORT}`,
-  );
+  console.log(`watching for changes — serving out on http://localhost:${PORT}`);
   build();
 });

@@ -1,13 +1,15 @@
 {
-  "name": "mashay",
+  "name": "@draekien/mashay",
   "version": "1.0.0",
   "description": "Convert Markdown into self-contained, styled HTML documents",
   "keywords": [
-    "whitepaper",
     "markdown",
     "html",
     "cli"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "author": "William Pei",
   "license": "MIT",
   "repository": {
@@ -27,12 +29,13 @@
   },
   "files": [
     "dist",
-    "whitepapers/template"
+    "templates",
+    "themes"
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "pnpm typecheck && rolldown -c rolldown.config.mjs",
-    "build:whitepapers": "pnpm build && node dist/cli.js whitepaper whitepapers/src --out whitepapers/dist",
+    "build:examples": "pnpm build && node dist/cli.js examples --out out",
     "dev": "node scripts/dev.mjs",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
@@ -43,6 +46,9 @@
   },
   "dependencies": {
     "@clack/prompts": "1.7.0",
+    "@tailwindcss/node": "4.3.3",
+    "@tailwindcss/oxide": "4.3.3",
+    "@tailwindcss/typography": "0.5.20",
     "chalk": "5.6.2",
     "commander": "15.0.0",
     "gray-matter": "4.0.3",
@@ -54,6 +60,7 @@
     "remark-gfm": "4.0.1",
     "remark-parse": "11.0.0",
     "remark-rehype": "11.1.2",
+    "tailwindcss": "4.3.3",
     "unified": "11.0.5",
     "unist-util-visit": "5.1.0",
     "vfile": "6.0.3",

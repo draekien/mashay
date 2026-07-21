@@ -19,15 +19,7 @@ export const FrontmatterSchema = z
     version: z.string().optional(),
     reviewers: z.array(z.string()).optional(),
     classification: z.string().optional(),
-    changelog: z
-      .array(
-        ChangelogEntrySchema,
-        "a revision history is required — add a changelog with at least the initial version",
-      )
-      .min(
-        1,
-        "a revision history needs at least one entry — record the initial version",
-      ),
+    changelog: z.array(ChangelogEntrySchema).optional(),
   })
   .passthrough();
 

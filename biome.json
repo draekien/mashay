@@ -6,12 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": [
-      "**",
-      "!!**/dist",
-      "!!whitepapers/template/template.html",
-      "!!**/*.svg"
-    ]
+    "includes": ["**", "!!**/dist", "!!templates/**/*.html", "!!**/*.svg"]
   },
   "formatter": {
     "enabled": true,

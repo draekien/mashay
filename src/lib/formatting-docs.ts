@@ -12,14 +12,14 @@ export const FORMATTING_TOPICS: FormattingTopic[] = [
     id: "frontmatter",
     title: "Frontmatter",
     summary:
-      "changelog is required; every other field is optional. Unrecognized extra fields pass through without error, but a field of the wrong shape (e.g. a non-string title, or reviewers given as a string instead of a list) fails the build. Omit title and the output's <title> falls back to the source filename.\n\n" +
-      'status renders as a small eyebrow line above the title (falls back to "Whitepaper" if omitted). version, date, author, reviewers (comma-joined), and classification render as a meta grid below the subtitle — each only appears when set, and the whole grid is omitted when none of the five are set.\n\n' +
+      "Every field is optional. Unrecognized extra fields pass through without error, but a field of the wrong shape (e.g. a non-string title, or reviewers given as a string instead of a list) fails the build. Omit title and the output's <title> falls back to the source filename.\n\n" +
+      "status renders as a small badge above the title; when omitted, no eyebrow is rendered at all. version, date, author, reviewers (comma-joined), and classification render as a meta grid below the subtitle — each only appears when set, and the whole grid is omitted when none of the five are set.\n\n" +
       "logo is an optional path to an image (SVG or a raster format like PNG/JPEG), resolved relative to the Markdown source file, inlined into the masthead logo slot — SVGs embedded as-is, raster images as a base64 data: URI. Omit it and the masthead renders with no logo.\n\n" +
-      'changelog is a required list of { version, date, description } entries (date/description optional, version required) — at least one entry recording the initial version. It renders as a collapsed "Revision History" disclosure at the top of the content column, rows in the given order. A file without a changelog fails the build.',
+      'changelog is an optional list of { version, date, description } entries (date/description optional, version required). When present it renders as a collapsed "Revision History" disclosure at the top of the content column, rows in the given order.',
     example: [
       "---",
-      "title: Streamlining Property Due Diligence",
-      "description: How automation reduces settlement risk for conveyancers.",
+      "title: A Field Guide to Coffee Brewing",
+      "description: How grind size, water, and time shape a cup.",
       "author: Jane Researcher",
       "logo: logo.svg",
       "date: 2026-07-13",
@@ -50,7 +50,7 @@ export const FORMATTING_TOPICS: FormattingTopic[] = [
     title: "Alert blockquotes",
     summary:
       "GitHub-style alert blockquotes, grouped into four visual styles following Obsidian's callout semantics (important and hint are aliases of tip; caution and attention are aliases of warning — only genuinely negative types render as errors). The five GitHub markers map as: [!NOTE], [!TIP], and [!IMPORTANT] → info; [!WARNING] and [!CAUTION] → warn.\n\n" +
-      "Obsidian's broader callout vocabulary is also recognized case-insensitively — [!ABSTRACT]/[!SUMMARY]/[!TLDR]/[!INFO]/[!TODO]/[!HINT]/[!EXAMPLE]/[!QUOTE]/[!CITE] → info; [!SUCCESS]/[!CHECK]/[!DONE] → success; [!QUESTION]/[!HELP]/[!FAQ]/[!ATTENTION] → warn; [!DANGER]/[!ERROR]/[!FAILURE]/[!FAIL]/[!MISSING]/[!BUG] → error. Obsidian's optional trailing fold indicator ([!TIP]+ or [!TIP]-) is accepted but ignored — the whitepaper alert box is never collapsible.\n\n" +
+      "Obsidian's broader callout vocabulary is also recognized case-insensitively — [!ABSTRACT]/[!SUMMARY]/[!TLDR]/[!INFO]/[!TODO]/[!HINT]/[!EXAMPLE]/[!QUOTE]/[!CITE] → info; [!SUCCESS]/[!CHECK]/[!DONE] → success; [!QUESTION]/[!HELP]/[!FAQ]/[!ATTENTION] → warn; [!DANGER]/[!ERROR]/[!FAILURE]/[!FAIL]/[!MISSING]/[!BUG] → error. Obsidian's optional trailing fold indicator ([!TIP]+ or [!TIP]-) is accepted but ignored — the alert box is never collapsible.\n\n" +
       "The marker must be the first line of the blockquote. Text on the same line as the marker becomes a separate paragraph below the alert title, same as text on following lines.\n\n" +
       "A blockquote with no recognized marker renders as an ordinary <blockquote> — no special styling.",
     example: "> [!NOTE]\n> Some contextual detail.",
@@ -59,7 +59,7 @@ export const FORMATTING_TOPICS: FormattingTopic[] = [
     id: "mermaid",
     title: "Mermaid diagrams",
     summary:
-      "Diagrams render client-side and are click-to-zoom (opens a lightbox on click). The Mermaid renderer script is only inlined into files that actually contain a mermaid code block — a whitepaper with a diagram needs internet access at view time, since the renderer loads from a CDN rather than being inlined.",
+      "Diagrams render client-side and are click-to-zoom (opens a lightbox on click). The Mermaid renderer script is only inlined into files that actually contain a mermaid code block — a document with a diagram needs internet access at view time, since the renderer loads from a CDN rather than being inlined.",
     example: "```mermaid\nflowchart LR\n    A[Start] --> B[End]\n```",
   },
   {

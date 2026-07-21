@@ -12,13 +12,8 @@ const execFileAsync = promisify(execFile);
 // bundled file's location, so template loading only resolves correctly once bundled.
 const ROOT = path.resolve(import.meta.dirname, "..");
 const CLI = path.join(ROOT, "dist", "cli.js");
-const FIXTURE = path.join(ROOT, "whitepapers", "src", "example-whitepaper.md");
-const OBSIDIAN_FIXTURE = path.join(
-  ROOT,
-  "whitepapers",
-  "src",
-  "example-obsidian-whitepaper.md",
-);
+const FIXTURE = path.join(ROOT, "examples", "example.md");
+const OBSIDIAN_FIXTURE = path.join(ROOT, "examples", "example-obsidian.md");
 
 let outDir: string;
 
@@ -40,13 +35,10 @@ describe("built CLI end-to-end", () => {
     expect(stdout.trim()).toBe(pkg.version);
   });
 
-  it("renders the example whitepaper fixture to a self-contained HTML file", async () => {
-    await execFileAsync("node", [CLI, "whitepaper", FIXTURE, "--out", outDir]);
+  it("renders the example fixture to a self-contained HTML file", async () => {
+    await execFileAsync("node", [CLI, FIXTURE, "--out", outDir]);
 
-    const html = await readFile(
-      path.join(outDir, "example-whitepaper.html"),
-      "utf8",
-    );
+    const html = await readFile(path.join(outDir, "example.html"), "utf8");
 
     expect(html).toMatchSnapshot();
   });
@@ -58,38 +50,27 @@ describe("built CLI end-to-end", () => {
       '---\nchangelog:\n  - version: "1.0"\n    description: Initial version.\n---\n\n## Just a heading\n\nSome text.\n',
     );
 
-    await execFileAsync("node", [
-      CLI,
-      "whitepaper",
-      plainFixture,
-      "--out",
-      outDir,
-    ]);
+    await execFileAsync("node", [CLI, plainFixture, "--out", outDir]);
 
     const html = await readFile(path.join(outDir, "plain.html"), "utf8");
     expect(html).not.toContain("cdn.jsdelivr.net/npm/mermaid");
   });
 
-  it("fails the build when a file has no changelog revision history", async () => {
+  it("builds a file with no changelog (the changelog is optional)", async () => {
     const noChangelog = path.join(outDir, "no-changelog.md");
     await writeFile(noChangelog, "## Just a heading\n\nSome text.\n");
 
-    await expect(
-      execFileAsync("node", [CLI, "whitepaper", noChangelog, "--out", outDir]),
-    ).rejects.toThrow(/changelog.*revision history/is);
+    await execFileAsync("node", [CLI, noChangelog, "--out", outDir]);
+
+    const html = await readFile(path.join(outDir, "no-changelog.html"), "utf8");
+    expect(html).not.toContain("Revision History");
   });
 
   it("renders the Obsidian-vault-style fixture (wikilinks, embeds, callouts, highlights) to self-contained HTML", async () => {
-    await execFileAsync("node", [
-      CLI,
-      "whitepaper",
-      OBSIDIAN_FIXTURE,
-      "--out",
-      outDir,
-    ]);
+    await execFileAsync("node", [CLI, OBSIDIAN_FIXTURE, "--out", outDir]);
 
     const html = await readFile(
-      path.join(outDir, "example-obsidian-whitepaper.html"),
+      path.join(outDir, "example-obsidian.html"),
       "utf8",
     );
     expect(html).toMatchSnapshot();

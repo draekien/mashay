@@ -1,5 +1,7 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { access, mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { compile } from "@tailwindcss/node";
+import { Scanner } from "@tailwindcss/oxide";
 import matter from "gray-matter";
 import { VFile } from "vfile";
 import { buildChangelog, buildEyebrow, buildMetaGrid } from "./doc-header.js";
@@ -12,13 +14,19 @@ import { processor } from "./pipeline.js";
 import { buildToc } from "./toc.js";
 
 const PACKAGE_ROOT = path.resolve(import.meta.dirname, "..");
-const TEMPLATE_DIR = path.join(PACKAGE_ROOT, "whitepapers", "template");
+const TEMPLATES_DIR = path.join(PACKAGE_ROOT, "templates");
+const THEMES_DIR = path.join(PACKAGE_ROOT, "themes");
 const MERMAID_CDN_URL =
   "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js";
 
+export interface BuildOptions {
+  template: string;
+  theme: string;
+}
+
 interface TemplateAssets {
   template: string;
-  styles: string;
+  cssInput: string;
   mermaidScript: string;
 }
 
@@ -71,6 +79,8 @@ async function renderHtml(
 
   // Function-form replacements: a string second arg to replace/replaceAll interprets
   // $&, $`, $' etc., and the mermaid bundle (and user content) can easily contain those.
+  // The `{{styles}}` slot is left untouched here so the assembled page can be scanned
+  // for Tailwind candidates before the compiled CSS is inlined.
   const page = assets.template
     .replaceAll("{{title}}", () => frontmatter.title ?? base)
     .replaceAll("{{description}}", () => frontmatter.description ?? "")
@@ -92,14 +102,16 @@ async function renderHtml(
       buildToc(file.data.toc ?? [], file.data.appendixToc ?? []),
     )
     .replaceAll("{{content}}", () => html)
-    .replace("{{styles}}", () => assets.styles)
     .replace("{{logo}}", () => logo)
     .replace("{{mermaid}}", () =>
       file.data.hasMermaid ? assets.mermaidScript : "",
     );
 
+  const styles = await compilePageCss(assets.cssInput, page);
+  const finalPage = page.replace("{{styles}}", () => styles);
+
   const outName = `${base}.html`;
-  await writeFile(path.join(outDir, outName), page, "utf8");
+  await writeFile(path.join(outDir, outName), finalPage, "utf8");
   return { outName, hasMermaid: Boolean(file.data.hasMermaid) };
 }
 
@@ -135,27 +147,94 @@ async function renderOne(
   return { outNames: [html.outName], hasMermaid: html.hasMermaid };
 }
 
-async function loadTemplateAssets(): Promise<TemplateAssets> {
-  const template = await readFile(
-    path.join(TEMPLATE_DIR, "template.html"),
-    "utf8",
-  );
-  const tokens = await readFile(
-    path.join(TEMPLATE_DIR, "assets", "tokens.css"),
-    "utf8",
-  );
-  const whitepaperCss = await readFile(
-    path.join(TEMPLATE_DIR, "whitepaper.css"),
-    "utf8",
-  );
-  const styles = `${tokens}\n${whitepaperCss}`;
+async function listNames(dir: string): Promise<string[]> {
+  const entries = await readdir(dir, { withFileTypes: true }).catch(() => []);
+  return entries
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+}
+
+async function resolveTemplateFile(name: string): Promise<string> {
+  const file = path.join(TEMPLATES_DIR, name, "template.html");
+  try {
+    await access(file);
+    return file;
+  } catch {
+    const available = await listNames(TEMPLATES_DIR);
+    throw new Error(
+      `unknown template "${name}" — available templates: ${available.join(", ") || "(none)"}`,
+    );
+  }
+}
+
+async function resolveThemeFile(name: string): Promise<string> {
+  const file = path.join(THEMES_DIR, name, "theme.css");
+  try {
+    await access(file);
+    return file;
+  } catch {
+    const available = await listNames(THEMES_DIR);
+    throw new Error(
+      `unknown theme "${name}" — available themes: ${available.join(", ") || "(none)"}`,
+    );
+  }
+}
+
+// Assembles the Tailwind v4 input: the framework and typography plugin, then
+// the theme's colour tokens, then the template's own CSS (non-colour tokens,
+// component rules, and `--tw-prose-*` mappings). The theme and template CSS
+// are plain (unlayered), so they are emitted after Tailwind's @layer blocks and
+// reliably win over the generated `prose` utilities. The template CSS is
+// optional — a template styled purely with utilities can omit template.css.
+async function buildCssInput(
+  themeFile: string,
+  templateCssFile: string,
+): Promise<string> {
+  const theme = await readFile(themeFile, "utf8");
+  const templateCss = await readFile(templateCssFile, "utf8").catch(() => "");
+  return [
+    '@import "tailwindcss";',
+    '@plugin "@tailwindcss/typography";',
+    theme,
+    templateCss,
+  ].join("\n");
+}
+
+// Compiles the CSS for a single assembled page. A fresh compiler is created per
+// document: Tailwind's `compiler.build(candidates)` accumulates candidates
+// across calls, so reusing one compiler across a batch would leak every earlier
+// document's utilities into later pages (and make per-doc output order-
+// dependent). Re-parsing the input per document is cheap at the document counts
+// this tool handles. The page is scanned for candidate class names so only the
+// CSS it needs is emitted; Tailwind's leading license comment is stripped.
+async function compilePageCss(cssInput: string, html: string): Promise<string> {
+  const compiler = await compile(cssInput, {
+    base: PACKAGE_ROOT,
+    onDependency: () => {},
+  });
+  const scanner = new Scanner({});
+  const candidates = scanner.scanFiles([{ content: html, extension: "html" }]);
+  const css = compiler.build(candidates);
+  return css.replace(/^\/\*![\s\S]*?\*\/\s*/, "");
+}
+
+async function loadTemplateAssets(
+  options: BuildOptions,
+): Promise<TemplateAssets> {
+  const templateFile = await resolveTemplateFile(options.template);
+  const themeFile = await resolveThemeFile(options.theme);
+  const templateCssFile = path.join(path.dirname(templateFile), "template.css");
+
+  const template = await readFile(templateFile, "utf8");
+  const cssInput = await buildCssInput(themeFile, templateCssFile);
 
   const mermaidScript = [
     `<script src="${MERMAID_CDN_URL}"></script>`,
     `<script>mermaid.initialize({ startOnLoad: true, securityLevel: "strict" });</script>`,
   ].join("\n");
 
-  return { template, styles, mermaidScript };
+  return { template, cssInput, mermaidScript };
 }
 
 export interface BuildResult {
@@ -165,14 +244,15 @@ export interface BuildResult {
 }
 
 /** Renders each given Markdown file to `outDir` as self-contained HTML. */
-export async function buildWhitepapers(
+export async function buildDocuments(
   files: string[],
   outDir: string,
+  options: BuildOptions,
 ): Promise<BuildResult[]> {
   if (files.length === 0) return [];
 
   await mkdir(outDir, { recursive: true });
-  const assets = await loadTemplateAssets();
+  const assets = await loadTemplateAssets(options);
 
   const results: BuildResult[] = [];
   for (const file of files) {

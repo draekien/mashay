@@ -1,8 +1,7 @@
 // Builds the optional pieces of the document header banner that render only when
-// the corresponding frontmatter field is present, so a whitepaper with none of these
-// fields falls back to the plain "Whitepaper" eyebrow with no meta grid. The changelog
-// (required by the frontmatter schema) renders as a collapsed disclosure at the top of
-// the content column.
+// the corresponding frontmatter field is present, so a document with none of these
+// fields renders no eyebrow and no meta grid. The changelog, when present, renders as
+// a collapsed disclosure at the top of the content column.
 
 import type { ChangelogEntry } from "./frontmatter.js";
 
@@ -15,7 +14,7 @@ export interface MetaGridFields {
 }
 
 export function buildEyebrow(status?: string): string {
-  if (!status) return `<span class="eyebrow">Whitepaper</span>`;
+  if (!status) return "";
   return `<span class="status-badge">${status}</span>`;
 }
 

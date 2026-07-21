@@ -3,10 +3,8 @@ import { buildChangelog, buildEyebrow, buildMetaGrid } from "./doc-header.js";
 import { formatDate } from "./frontmatter.js";
 
 describe("buildEyebrow", () => {
-  it("falls back to a plain 'Whitepaper' label when status is absent", () => {
-    expect(buildEyebrow(undefined)).toBe(
-      `<span class="eyebrow">Whitepaper</span>`,
-    );
+  it("renders no eyebrow element when status is absent", () => {
+    expect(buildEyebrow(undefined)).toBe("");
   });
 
   it("renders a status badge span when status is present", () => {
