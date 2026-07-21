@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.0.3](https://github.com/draekien/mashay/compare/v0.0.2...v0.0.3) (2026-07-21)
+
+
+### Features
+
+* link academic template footer to the mashay repository ([c4a8043](https://github.com/draekien/mashay/commit/c4a804392eba604485063d5560f37d6abaea6229))
+
 ## 0.0.2 (2026-07-21)
 
 
