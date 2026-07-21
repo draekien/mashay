@@ -3,6 +3,10 @@
 Converts Markdown into self-contained, styled HTML documents — a single file
 with all styles (and any logo) inlined, ready to share or email.
 
+The name is *mâché*, as in papier-mâché (say it "mash-AY"): mashay layers your
+Markdown — content, styles, logo, everything — into one finished, self-contained
+document, the way papier-mâché layers paper into a single solid object.
+
 ## Quick start
 
 Run it from anywhere without installing anything permanently:
