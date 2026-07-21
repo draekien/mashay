@@ -46,6 +46,12 @@ lefthook runs on pre-commit: `pnpm typecheck`, then `biome check --write` on sta
 - `src/lib/formatting-docs.ts` backs the `mashay docs` CLI command and mirrors this skill's rules — update both together.
 - The skill is distributed standalone via `npx skills`, so its body must reference only files bundled under the skill directory (`assets/`), never repo-relative paths like `../../../examples/`. `.claude/skills/using-mashay/assets/example.md` and `assets/example-obsidian.md` are copies of `examples/example.md` and `examples/example-obsidian.md` — keep them in sync when the examples change.
 
+## Docs maintenance
+
+- `README.md` is a lean landing page (what mashay is, a quick-start, a docs index, the skill install, license); the detailed docs live in `docs/`. Keep both in sync with code the same way `SKILL.md` is: a change to the behavior a doc describes updates that doc in the same change.
+- Which file covers what: `docs/cli.md` (subcommands, flags/args, interactive mode, installing), `docs/exit-codes.md` (the exit-code taxonomy — mirrors `src/lib/errors.ts` and `mashay docs exit-codes`), `docs/templates-and-themes.md` (the template/theme model), `docs/markdown.md` (frontmatter fields, headings/TOC, alerts, code blocks, mermaid, appendix, Obsidian syntax — mirrors `src/lib/formatting-docs.ts` and `SKILL.md`), `docs/contributing.md` (project layout, dev commands, publishing).
+- The Markdown authoring rules now have three sources of truth to update together: `docs/markdown.md`, `src/lib/formatting-docs.ts`, and the `using-mashay` skill. The exit-code table has two: `docs/exit-codes.md` and `EXIT_CODE_TABLE` in `src/lib/errors.ts`. README/docs cross-links are repo-relative (`./docs/*.md`, `../examples/*`) — keep them resolving when files move.
+
 ## Gotchas
 
 - A module-level `/g`-flagged `RegExp` shares `lastIndex` across calls: if `.test()` runs first, a later `.matchAll()` on the same object inherits the stale `lastIndex` and can silently scan from mid-string, finding zero matches. Reset `re.lastIndex = 0` immediately before each independent use (see `remark-obsidian-embeds.ts`).
