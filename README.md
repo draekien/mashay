@@ -30,17 +30,16 @@ help. See the [CLI reference](./docs/cli.md) for installing, flags, and the
 - [Markdown conventions](./docs/markdown.md) — frontmatter, headings, alerts, code blocks, mermaid, appendix, Obsidian syntax
 - [Contributing](./docs/contributing.md) — project layout, development commands, publishing
 
-## Claude Code skill
+## Agent skill
 
-Agents using [Claude Code](https://claude.com/claude-code) can install the
-`using-mashay` skill straight from this repo:
+Coding agents can install the `using-mashay` skill straight from this repo:
 
 ```bash
 npx skills add draekien/mashay --skill using-mashay
 ```
 
-This installs `.claude/skills/using-mashay/SKILL.md`, which explains how to
-invoke the CLI and how to author Markdown its pipeline understands.
+This installs the `using-mashay` skill, which explains how to invoke the CLI
+and how to author Markdown its pipeline understands.
 
 ## License
 
