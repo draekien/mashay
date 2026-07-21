@@ -1,0 +1,353 @@
+/**
+ * Design tokens — CSS Custom Properties
+ * The design token set that styles the generated documents.
+ * 1rem = 16px. All spacing and sizing steps are multiples of 4px; radii use 2px, 4px, and 8px.
+ *
+ * Naming conventions:
+ *   --color-{scale}-{stop}     e.g. --color-primary-600
+ *   --spacing-{name}           e.g. --spacing-medium
+ *   --font-size-{variant}-{viewport}  e.g. --font-size-hero-mobile
+ *   --font-weight-{variant}    e.g. --font-weight-hero
+ *   --shadow-{name}            e.g. --shadow-medium
+ *   --radius-{name}            e.g. --radius-large
+ *   --breakpoint-{name}        e.g. --breakpoint-desktop
+ *   --z-{name}                 e.g. --z-highest
+ *   --transition-{name}        e.g. --transition-fast
+ */
+
+:root {
+  /* =========================================================
+     COLORS — Primary (Teal / Cyan)
+     ========================================================= */
+
+  --color-primary-100: #f2fbfd;
+  --color-primary-200: #e4f7fb;
+  --color-primary-300: #c5edf6;
+  --color-primary-400: #90dfef;
+  --color-primary-500: #40b6ce;
+  --color-primary-600: #0c7e96;
+  --color-primary-700: #146076;
+  --color-primary-800: #034e5e;
+  --color-primary-900: #1c353b;
+  --color-primary-1000: #111617;
+
+  /* =========================================================
+     COLORS — Secondary (Amber / Gold)
+     ========================================================= */
+
+  --color-secondary-100: #fefaf5;
+  --color-secondary-200: #fdf4e2;
+  --color-secondary-300: #ffe9bd;
+  --color-secondary-400: #ffd88a;
+  --color-secondary-500: #fec757;
+  --color-secondary-600: #ffb733;
+  --color-secondary-700: #e08a00;
+  --color-secondary-800: #955d04;
+  --color-secondary-900: #5c3900;
+  --color-secondary-1000: #2b251c;
+
+  /* =========================================================
+     COLORS — Tertiary (Deep Blue)
+     ========================================================= */
+
+  --color-tertiary-100: #f6fbfd;
+  --color-tertiary-200: #eaf5fb;
+  --color-tertiary-300: #d6eaf4;
+  --color-tertiary-400: #a2d0e6;
+  --color-tertiary-500: #6bb9e1;
+  --color-tertiary-600: #1c93ca;
+  --color-tertiary-700: #066b9d;
+  --color-tertiary-800: #03547d;
+  --color-tertiary-900: #023e5c;
+  --color-tertiary-1000: #012537;
+
+  /* =========================================================
+     COLORS — Special (Orange / Coral)
+     Use for promotional CTAs and urgency signals only —
+     not for status indicators.
+     ========================================================= */
+
+  --color-special-100: #fef8f5;
+  --color-special-200: #fdeae2;
+  --color-special-300: #fed0bd;
+  --color-special-400: #fea17c;
+  --color-special-500: #f47a4d;
+  --color-special-600: #f15a22;
+  --color-special-700: #c03d0c;
+  --color-special-800: #902d09;
+  --color-special-900: #431504;
+  --color-special-1000: #220b02;
+
+  /* =========================================================
+     COLORS — AI (Purple)
+     Exclusively for AI-generated content and AI-feature
+     surfaces. Never for general decorative purple.
+     ========================================================= */
+
+  --color-ai-100: #f9f6fe;
+  --color-ai-200: #ece3fc;
+  --color-ai-300: #d9c9f3;
+  --color-ai-400: #b99be8;
+  --color-ai-500: #986ede;
+  --color-ai-600: #7b44d4;
+  --color-ai-700: #5c2da9;
+  --color-ai-800: #431d81;
+  --color-ai-900: #2b1353;
+  --color-ai-1000: #0f071d;
+
+  /* =========================================================
+     COLORS — Neutral (Grey scale)
+     000 = pure white, 1000 = near-black.
+     ========================================================= */
+
+  --color-neutral-000: #ffffff;
+  --color-neutral-100: #f8fafb;
+  --color-neutral-200: #f0f3f6;
+  --color-neutral-300: #dbe0e6;
+  --color-neutral-400: #cad1d8;
+  --color-neutral-500: #b3bdc7;
+  --color-neutral-600: #7c8a98;
+  --color-neutral-700: #576575;
+  --color-neutral-800: #3d4752;
+  --color-neutral-900: #1b242d;
+  --color-neutral-1000: #0f1419;
+
+  /* =========================================================
+     COLORS — Success (Green)
+     ========================================================= */
+
+  --color-success-100: #f1f9f3;
+  --color-success-200: #e3f7ea;
+  --color-success-300: #ccf0d7;
+  --color-success-400: #9ce2b6;
+  --color-success-500: #73c486;
+  --color-success-600: #43a047;
+  --color-success-700: #267e3c;
+  --color-success-800: #006629;
+  --color-success-900: #00471b;
+  --color-success-1000: #002914;
+
+  /* =========================================================
+     COLORS — Error (Red)
+     ========================================================= */
+
+  --color-error-100: #fff5f5;
+  --color-error-200: #ffe5e6;
+  --color-error-300: #ffbdbf;
+  --color-error-400: #ff8589;
+  --color-error-500: #fd444a;
+  --color-error-600: #e0191f;
+  --color-error-700: #c20a10;
+  --color-error-800: #a30005;
+  --color-error-900: #610003;
+  --color-error-1000: #290001;
+
+  /* =========================================================
+     COLORS — Alert (Amber)
+     ========================================================= */
+
+  --color-alert-100: #fcf5ee;
+  --color-alert-200: #fceede;
+  --color-alert-300: #fae0c2;
+  --color-alert-400: #f5c284;
+  --color-alert-500: #ffac4c;
+  --color-alert-600: #f38e1b;
+  --color-alert-700: #d66400;
+  --color-alert-800: #b44a04;
+  --color-alert-900: #5c3100;
+  --color-alert-1000: #291600;
+
+  /* =========================================================
+     COLORS — Information (Teal — mirrors Primary exactly)
+     Use information/* for status message contexts so intent
+     survives a future palette change.
+     ========================================================= */
+
+  --color-information-100: #f2fbfd;
+  --color-information-200: #e4f7fb;
+  --color-information-300: #c5edf6;
+  --color-information-400: #90dfef;
+  --color-information-500: #40b6ce;
+  --color-information-600: #0c7e96;
+  --color-information-700: #146076;
+  --color-information-800: #034e5e;
+  --color-information-900: #1c353b;
+  --color-information-1000: #111617;
+
+  /* =========================================================
+     COLORS — Semantic singles
+     ========================================================= */
+
+  --color-text: #1b242d;
+  --color-background: #ffffff;
+
+  /* =========================================================
+     COLORS — Overlays
+     050–200: hover tints, disabled states, zebra-striping.
+     300–400: partial obscuring (drawers, panels).
+     base:    full modal scrim.
+     ========================================================= */
+
+  --color-overlay: rgba(29, 38, 48, 0.5);
+  --color-overlay-050: rgba(24, 77, 129, 0.03);
+  --color-overlay-100: rgba(0, 48, 82, 0.06);
+  --color-overlay-200: rgba(6, 49, 92, 0.15);
+  --color-overlay-300: rgba(3, 35, 67, 0.3);
+  --color-overlay-400: rgba(2, 33, 63, 0.5);
+
+  /* =========================================================
+     COLORS — App chrome: Sidebar
+     Use only for sidebar/navigation surfaces.
+     ========================================================= */
+
+  --color-sidebar-background: #012c41;
+  --color-sidebar-color: #ffffff;
+  --color-sidebar-menu-item-background: #012c41;
+  --color-sidebar-menu-item-hover-background: #03547d;
+  --color-sidebar-menu-item-active-background: #023e5c;
+  --color-sidebar-menu-item-color: #ffffff;
+  --color-sidebar-contact-color: #ffffff;
+  --color-sidebar-scrollbar-background: rgba(255, 255, 255, 0.2);
+  --color-sidebar-skeleton-background: #012c41;
+  --color-sidebar-skeleton-shimmer-background: #03547d;
+  --color-sidebar-gradient-background: linear-gradient(
+    180deg,
+    rgba(1, 44, 65, 0) 0%,
+    #012c41 100%
+  );
+
+  /* =========================================================
+     COLORS — App chrome: Topbar
+     Use only for topbar/navigation bar surfaces.
+     ========================================================= */
+
+  --color-topbar-background: #023e5c;
+  --color-topbar-color: #ffffff;
+  --color-topbar-border: #023e5c;
+  --color-topbar-searchbar-background: #012c41;
+  --color-topbar-searchbar-color: #ffffff;
+
+  /* =========================================================
+     SPACING
+     Always use rem or named tokens — never raw px values.
+     ========================================================= */
+
+  --spacing-extra-extra-small: 0.25rem; /* 4px  */
+  --spacing-extra-small: 0.5rem; /* 8px  */
+  --spacing-small: 1rem; /* 16px */
+  --spacing-medium: 1.5rem; /* 24px */
+  --spacing-large: 2rem; /* 32px */
+  --spacing-extra-large: 3rem; /* 48px */
+
+  /* =========================================================
+     TYPOGRAPHY — Font sizes (mobile)
+     ========================================================= */
+
+  --font-size-hero-mobile: 1.875rem; /* 30px */
+  --font-size-feature-mobile: 1.5rem; /* 24px */
+  --font-size-title-mobile: 1.25rem; /* 20px */
+  --font-size-subtitle-mobile: 1rem; /* 16px */
+  --font-size-surtitle-mobile: 0.875rem; /* 14px */
+  --font-size-eyebrow-mobile: 0.6875rem; /* 11px */
+  --font-size-medium-mobile: 1rem; /* 16px */
+  --font-size-small-mobile: 0.875rem; /* 14px */
+  --font-size-caption: 0.625rem; /* 10px — same on all viewports */
+
+  /* =========================================================
+     TYPOGRAPHY — Font sizes (desktop, ≥ 992px)
+     ========================================================= */
+
+  --font-size-hero-desktop: 1.5rem; /* 24px */
+  --font-size-feature-desktop: 1.25rem; /* 20px */
+  --font-size-title-desktop: 1rem; /* 16px */
+  --font-size-subtitle-desktop: 0.875rem; /* 14px */
+  --font-size-surtitle-desktop: 0.75rem; /* 12px */
+  --font-size-eyebrow-desktop: 0.6875rem; /* 11px — same as mobile */
+  --font-size-medium-desktop: 0.875rem; /* 14px */
+  --font-size-small-desktop: 0.75rem; /* 12px */
+
+  /* =========================================================
+     TYPOGRAPHY — Font weights
+     ========================================================= */
+
+  --font-weight-hero: 600;
+  --font-weight-feature: 600;
+  --font-weight-title: 600;
+  --font-weight-subtitle: 600;
+  --font-weight-surtitle: 600;
+  --font-weight-eyebrow: 700; /* only weight-700 variant */
+  --font-weight-medium: 400;
+  --font-weight-small: 400;
+  /* caption has no weight constraint — no --font-weight-caption variable */
+
+  /* =========================================================
+     SHADOWS / ELEVATION
+     Base color: rgb(3, 35, 67) — dark navy.
+     Do not use on primary/800+ dark backgrounds (invisible).
+     ========================================================= */
+
+  --shadow-extra-small: 0px 1px 3px -1px rgba(3, 35, 67, 0.3);
+  --shadow-small:
+    0px 0px 2px rgba(3, 35, 67, 0.1), 0px 3px 6px -2px rgba(3, 35, 67, 0.25);
+  --shadow-medium:
+    0px 0px 2px rgba(3, 35, 67, 0.05), 0px 12px 24px -8px rgba(3, 35, 67, 0.25);
+  --shadow-large:
+    0px 0px 2px rgba(3, 35, 67, 0.05), 0px 24px 48px -16px rgba(3, 35, 67, 0.25);
+  --shadow-extra-large:
+    0px 0px 2px rgba(3, 35, 67, 0.05), 0px 40px 80px -26px rgba(3, 35, 67, 0.25);
+
+  /* =========================================================
+     BORDER RADIUS
+     ========================================================= */
+
+  --radius-small: 0.125rem; /* 2px */
+  --radius-medium: 0.25rem; /* 4px */
+  --radius-large: 0.5rem; /* 8px */
+
+  /* =========================================================
+     BREAKPOINTS
+     CSS custom properties cannot be used in @media expressions — inline the
+     rem value directly: @media (min-width: 62rem) not var(--breakpoint-desktop).
+     ========================================================= */
+
+  --breakpoint-tablet: 48rem; /* 768px  */
+  --breakpoint-desktop: 62rem; /* 992px  */
+  --breakpoint-large: 75rem; /* 1200px */
+
+  /* =========================================================
+     Z-INDEX — Semantic layers
+     Always use these rather than hardcoded integers.
+     ========================================================= */
+
+  --z-lowest: 0;
+  --z-lower: 100;
+  --z-low: 200;
+  --z-middle: 300;
+  --z-high: 400;
+  --z-higher: 500;
+  --z-highest: 600;
+
+  /* =========================================================
+     Z-INDEX — Design system component assignments
+     For reference only — not configurable, not for reuse.
+     ========================================================= */
+
+  --z-component-pagination: 1;
+  --z-component-top-menu: 200;
+  --z-component-checkout: 200;
+  --z-component-drawer: 400;
+  --z-component-dropdown: 500;
+  --z-component-modal: 500;
+  --z-component-popover: 550;
+  --z-component-toast: 600;
+
+  /* =========================================================
+     TRANSITIONS
+     Pair with an explicit easing curve (e.g. ease-in-out).
+     Scope to specific properties rather than relying on
+     the implicit "all" when animating multiple properties.
+     ========================================================= */
+
+  --transition-fast: 300ms; /* hover, focus state changes  */
+  --transition-slow: 500ms; /* entrances and exits          */
+}

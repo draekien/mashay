@@ -1,0 +1,73 @@
+{
+  "name": "mashay",
+  "version": "1.0.0",
+  "description": "Convert Markdown into self-contained, styled HTML documents",
+  "keywords": [
+    "whitepaper",
+    "markdown",
+    "html",
+    "cli"
+  ],
+  "author": "William Pei",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/draekien/mashay.git"
+  },
+  "homepage": "https://github.com/draekien/mashay#readme",
+  "bugs": {
+    "url": "https://github.com/draekien/mashay/issues"
+  },
+  "type": "module",
+  "bin": {
+    "mashay": "dist/cli.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist",
+    "whitepapers/template"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "pnpm typecheck && rolldown -c rolldown.config.mjs",
+    "build:whitepapers": "pnpm build && node dist/cli.js whitepaper whitepapers/src --out whitepapers/dist",
+    "dev": "node scripts/dev.mjs",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "pretest": "pnpm run build",
+    "test": "vitest run",
+    "release": "commit-and-tag-version",
+    "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "@clack/prompts": "1.7.0",
+    "chalk": "5.6.2",
+    "commander": "15.0.0",
+    "gray-matter": "4.0.3",
+    "mdast-util-find-and-replace": "3.0.2",
+    "rehype-highlight": "7.0.2",
+    "rehype-raw": "7.0.0",
+    "rehype-slug": "6.0.0",
+    "rehype-stringify": "10.0.1",
+    "remark-gfm": "4.0.1",
+    "remark-parse": "11.0.0",
+    "remark-rehype": "11.1.2",
+    "unified": "11.0.5",
+    "unist-util-visit": "5.1.0",
+    "vfile": "6.0.3",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.3",
+    "@types/hast": "3.0.5",
+    "@types/mdast": "4.0.4",
+    "@types/node": "26.1.1",
+    "commit-and-tag-version": "12.7.3",
+    "lefthook": "2.1.10",
+    "rolldown": "1.1.5",
+    "typescript": "7.0.2",
+    "vitest": "4.1.10"
+  }
+}

@@ -1,0 +1,52 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`alert blockquotes > keeps text on the marker line as a separate paragraph inside the alert 1`] = `
+"<div class="alert alert-info">
+<p class="alert-title">Note</p>
+<p>Extra detail on the same line.</p>
+</div>"
+`;
+
+exports[`alert blockquotes > leaves an ordinary blockquote with no marker untouched 1`] = `
+"<blockquote>
+<p>Just a quote, no marker.</p>
+</blockquote>"
+`;
+
+exports[`alert blockquotes > turns a bare [!NOTE] marker into an info alert with just a title 1`] = `
+"<div class="alert alert-info">
+<p class="alert-title">Note</p>
+</div>"
+`;
+
+exports[`appendix section wrapping > wraps each appendix h3 subsection in a collapsible details element with the heading as summary 1`] = `
+"<h2 id="appendix">Appendix</h2>
+<details class="appendix-entry"><summary><span class="heading-number">A. </span>Methodology</summary>
+<p>Some body text.</p>
+</details><details class="appendix-entry"><summary><span class="heading-number">B. </span>Glossary</summary>
+<p>More text.</p></details>"
+`;
+
+exports[`fenced code blocks > renders the fence's meta string as a filename in the header 1`] = `
+"<div class="code-block"><div class="code-header"><span class="lang">ts</span><span class="filename">app.ts</span></div><pre><code class="hljs language-ts"><span class="hljs-keyword">const</span> x = <span class="hljs-number">1</span>;
+</code></pre></div>"
+`;
+
+exports[`fenced code blocks > wraps a code fence with a language in a .code-block with a .code-header showing the language 1`] = `
+"<div class="code-block"><div class="code-header"><span class="lang">ts</span></div><pre><code class="hljs language-ts"><span class="hljs-keyword">const</span> x = <span class="hljs-number">1</span>;
+</code></pre></div>"
+`;
+
+exports[`heading numbering > excludes the Appendix heading itself from numbering and from the toc 1`] = `"<h2 id="appendix">Appendix</h2>"`;
+
+exports[`heading numbering > numbers h2/h3 sequentially and resets the sub-counter on the next h2 1`] = `
+"<h2 id="first"><span class="heading-number">1. </span>First</h2>
+<h3 id="sub"><span class="heading-number">1.1. </span>Sub</h3>
+<h2 id="second"><span class="heading-number">2. </span>Second</h2>"
+`;
+
+exports[`mermaid code blocks > wraps a mermaid-tagged code fence in a mermaid render target and flags the file 1`] = `
+"<div class="mermaid-wrapper"><div class="mermaid">graph TD
+  A --- B
+</div></div>"
+`;

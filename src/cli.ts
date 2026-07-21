@@ -1,0 +1,212 @@
+#!/usr/bin/env node
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import {
+  cancel,
+  groupMultiselect,
+  intro,
+  isCancel,
+  note,
+  outro,
+  select,
+  spinner,
+  text,
+} from "@clack/prompts";
+import chalk from "chalk";
+import { Command } from "commander";
+import { type BuildResult, buildWhitepapers } from "./lib/build.js";
+import {
+  findMarkdownFilesRecursive,
+  resolveMarkdownFiles,
+} from "./lib/file-discovery.js";
+import {
+  FORMATTING_TOPICS,
+  type FormattingTopic,
+} from "./lib/formatting-docs.js";
+
+// package.json sits one level above this file both in the repo (src/, dist/)
+// and in the published package (dist/), so the version is read at runtime
+// rather than baked in at bundle time.
+const { version } = JSON.parse(
+  readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+) as { version: string };
+
+const program = new Command();
+
+program
+  .name("mashay")
+  .description("Convert Markdown into self-contained, styled HTML documents")
+  .version(version)
+  // Bare `mashay` shows the command list; each document type is its own
+  // subcommand so more can be added later without breaking invocations.
+  .action(() => {
+    program.help();
+  });
+
+program
+  .command("whitepaper")
+  .description(
+    "Build Markdown whitepapers into self-contained, styled HTML files",
+  )
+  .argument(
+    "[src]",
+    "markdown file or directory to build (omit to pick files interactively)",
+  )
+  .option("--out <dir>", "output directory", "out")
+  .action(async (src: string | undefined, opts: { out: string }) => {
+    try {
+      if (src) {
+        await runDirect(src, opts.out);
+      } else {
+        await runInteractive(opts.out);
+      }
+    } catch (err) {
+      console.error(
+        chalk.red(err instanceof Error ? err.message : String(err)),
+      );
+      process.exitCode = 1;
+    }
+  });
+
+async function runDirect(src: string, out: string): Promise<void> {
+  const srcPath = path.resolve(process.cwd(), src);
+  const outDir = path.resolve(process.cwd(), out);
+  const files = await resolveMarkdownFiles(srcPath);
+  const results = await buildWhitepapers(files, outDir);
+  reportResults(results);
+}
+
+async function runInteractive(out: string): Promise<void> {
+  intro(chalk.bold("mashay — whitepaper builder"));
+
+  const cwd = process.cwd();
+  const files = await findMarkdownFilesRecursive(cwd);
+
+  if (files.length === 0) {
+    cancel(`No markdown files found under ${cwd}`);
+    return;
+  }
+
+  const groups: Record<string, { value: string; label: string }[]> = {};
+  for (const file of files) {
+    const dir = path.relative(cwd, path.dirname(file)) || ".";
+    // biome-ignore lint/suspicious/noAssignInExpressions: idiomatic group-by-key accumulation
+    (groups[dir] ??= []).push({ value: file, label: path.basename(file) });
+  }
+
+  const selected = await groupMultiselect({
+    message: "Select whitepapers to build",
+    options: groups,
+    required: true,
+  });
+
+  if (isCancel(selected)) {
+    cancel("Cancelled");
+    return;
+  }
+
+  const outDirAnswer = await text({
+    message: "Output directory",
+    initialValue: out,
+  });
+
+  if (isCancel(outDirAnswer)) {
+    cancel("Cancelled");
+    return;
+  }
+
+  const outDir = path.resolve(cwd, outDirAnswer);
+
+  const s = spinner();
+  s.start("Building whitepapers");
+  const results = await buildWhitepapers(selected as string[], outDir);
+  s.stop("Build complete");
+
+  reportResults(results);
+  outro(
+    chalk.green(
+      `${results.length} whitepaper${results.length === 1 ? "" : "s"} written to ${path.relative(cwd, outDir) || "."}`,
+    ),
+  );
+}
+
+function reportResults(results: BuildResult[]): void {
+  for (const r of results) {
+    for (const outName of r.outNames) {
+      const isHtml = outName.endsWith(".html");
+      console.log(
+        chalk.green("built"),
+        outName + (isHtml && r.hasMermaid ? chalk.dim(" (+ mermaid)") : ""),
+      );
+    }
+  }
+}
+
+program
+  .command("docs")
+  .description(
+    "Explore the Markdown formatting rules and supported syntax mashay understands",
+  )
+  .argument(
+    "[topic]",
+    "topic id to print directly (omit for an interactive browser)",
+  )
+  .action(async (topic: string | undefined) => {
+    await runDocs(topic);
+  });
+
+function findTopic(query: string): FormattingTopic | undefined {
+  const q = query.trim().toLowerCase();
+  return (
+    FORMATTING_TOPICS.find((t) => t.id === q) ??
+    FORMATTING_TOPICS.find(
+      (t) => t.id.includes(q) || t.title.toLowerCase().includes(q),
+    )
+  );
+}
+
+function formatTopicBody(topic: FormattingTopic): string {
+  return topic.example
+    ? `${topic.summary}\n\n${chalk.dim("Example:")}\n${topic.example}`
+    : topic.summary;
+}
+
+async function runDocs(topicId: string | undefined): Promise<void> {
+  if (topicId) {
+    const topic = findTopic(topicId);
+    if (!topic) {
+      console.error(chalk.red(`No formatting topic matches "${topicId}".`));
+      console.error(
+        `Available topics: ${FORMATTING_TOPICS.map((t) => t.id).join(", ")}`,
+      );
+      process.exitCode = 1;
+      return;
+    }
+    console.log(chalk.bold(topic.title));
+    console.log();
+    console.log(formatTopicBody(topic));
+    return;
+  }
+
+  intro(chalk.bold("mashay — formatting rules"));
+
+  while (true) {
+    const choice = await select({
+      message: "Pick a topic to explore",
+      options: [
+        ...FORMATTING_TOPICS.map((t) => ({ value: t.id, label: t.title })),
+        { value: "__exit", label: "Exit" },
+      ],
+    });
+
+    if (isCancel(choice) || choice === "__exit") {
+      outro("Done");
+      return;
+    }
+
+    const topic = FORMATTING_TOPICS.find((t) => t.id === choice);
+    if (topic) note(formatTopicBody(topic), topic.title);
+  }
+}
+
+await program.parseAsync();
