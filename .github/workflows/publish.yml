@@ -1,0 +1,52 @@
+name: publish
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      # OIDC token for npm trusted publishing.
+      id-token: write
+      # Creating the GitHub release.
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          # Trusted publishing requires Node >= 22.14.0.
+          node-version: 22
+          registry-url: "https://registry.npmjs.org"
+          cache: pnpm
+
+      - name: Verify tag matches package.json version
+        run: |
+          pkg="$(node -p "require('./package.json').version")"
+          tag="${GITHUB_REF_NAME#v}"
+          if [ "$pkg" != "$tag" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match package.json version $pkg"
+            exit 1
+          fi
+
+      - run: pnpm install --frozen-lockfile
+
+      # Trusted publishing requires npm CLI >= 11.5.1; Node 22 ships an older npm.
+      - run: npm install -g npm@latest
+
+      # OIDC-authenticated publish (no token). npm runs the prepublishOnly script
+      # (pnpm build) automatically before packing; provenance is attached from
+      # the OIDC identity.
+      - run: npm publish --provenance
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes --verify-tag
