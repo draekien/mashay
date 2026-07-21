@@ -669,6 +669,14 @@ exports[`built CLI end-to-end > renders the Obsidian-vault-style fixture (wikili
   .text-\\[var\\(--color-neutral-600\\)\\] {
     color: var(--color-neutral-600);
   }
+  .text-\\[var\\(--color-primary-600\\)\\] {
+    color: var(--color-primary-600);
+  }
+  @media (hover: hover) {
+    .hover\\:underline:hover {
+      text-decoration-line: underline;
+    }
+  }
   @media (width >= 48rem) {
     .md\\:sticky {
       position: sticky;
@@ -1357,7 +1365,7 @@ body {
   </div>
 
   <footer class="doc-footer text-center text-[var(--color-neutral-600)] text-[0.8rem] p-8 border-t border-[var(--color-neutral-300)]">
-    <p>Built with mashay</p>
+    <p>Built with <a href="https://github.com/draekien/mashay" class="text-[var(--color-primary-600)] hover:underline">mashay</a></p>
   </footer>
 
   <div id="mermaid-lightbox" class="lightbox-overlay">
@@ -2069,6 +2077,14 @@ exports[`built CLI end-to-end > renders the example fixture to a self-contained 
   }
   .text-\\[var\\(--color-neutral-600\\)\\] {
     color: var(--color-neutral-600);
+  }
+  .text-\\[var\\(--color-primary-600\\)\\] {
+    color: var(--color-primary-600);
+  }
+  @media (hover: hover) {
+    .hover\\:underline:hover {
+      text-decoration-line: underline;
+    }
   }
   @media (width >= 48rem) {
     .md\\:sticky {
@@ -2822,7 +2838,7 @@ body {
   </div>
 
   <footer class="doc-footer text-center text-[var(--color-neutral-600)] text-[0.8rem] p-8 border-t border-[var(--color-neutral-300)]">
-    <p>Built with mashay</p>
+    <p>Built with <a href="https://github.com/draekien/mashay" class="text-[var(--color-primary-600)] hover:underline">mashay</a></p>
   </footer>
 
   <div id="mermaid-lightbox" class="lightbox-overlay">
