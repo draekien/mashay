@@ -19,6 +19,8 @@ import open from "open";
 import {
   type BuildSummary,
   buildDocuments,
+  listTemplates,
+  listThemes,
   renderToHtml,
 } from "./lib/build.js";
 import {
@@ -365,23 +367,72 @@ async function servePreview(html: string): Promise<void> {
   await open(url);
 }
 
+async function pickName(
+  kind: string,
+  names: string[],
+  preferred: string | undefined,
+): Promise<string | symbol> {
+  if (names.length === 0) {
+    return preferred ?? kind;
+  }
+  return select({
+    message: `Select a ${kind}`,
+    options: names.map((name) => ({ value: name, label: name })),
+    initialValue: preferred && names.includes(preferred) ? preferred : names[0],
+  });
+}
+
+async function resolvePreviewSelection(opts: {
+  template?: string;
+  theme?: string;
+}): Promise<{ template: string; theme: string } | undefined> {
+  if (opts.template && opts.theme) {
+    return { template: opts.template, theme: opts.theme };
+  }
+
+  intro(chalk.bold("mashay preview"));
+
+  let template = opts.template;
+  if (!template) {
+    const choice = await pickName("template", await listTemplates(), undefined);
+    if (isCancel(choice)) {
+      cancel("Cancelled");
+      return undefined;
+    }
+    template = choice;
+  }
+
+  let theme = opts.theme;
+  if (!theme) {
+    const choice = await pickName("theme", await listThemes(), template);
+    if (isCancel(choice)) {
+      cancel("Cancelled");
+      return undefined;
+    }
+    theme = choice;
+  }
+
+  return { template, theme };
+}
+
 program
   .command("preview")
   .description(
     "Preview a template/theme combination in the browser with a built-in sample",
   )
-  .option("--template <name>", "template to render with", "academic")
+  .option("--template <name>", "template to render with")
   .option(
     "--theme <name>",
     "theme to style with (defaults to the template name)",
   )
-  .action(async (opts: { template: string; theme?: string }) => {
-    const theme = opts.theme ?? opts.template;
+  .action(async (opts: { template?: string; theme?: string }) => {
     try {
+      const selection = await resolvePreviewSelection(opts);
+      if (!selection) return;
       const { html } = await renderToHtml(
         PREVIEW_MARKDOWN,
         path.resolve(process.cwd(), "preview.md"),
-        { template: opts.template, theme },
+        selection,
       );
       await servePreview(html);
     } catch (err) {

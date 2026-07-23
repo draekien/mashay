@@ -236,6 +236,22 @@ async function listNames(dir: string): Promise<string[]> {
     .sort();
 }
 
+/**
+ * Lists the names of the available templates, sorted alphabetically. Each name
+ * is usable as a `--template` value or `BuildOptions.template`.
+ */
+export function listTemplates(): Promise<string[]> {
+  return listNames(TEMPLATES_DIR);
+}
+
+/**
+ * Lists the names of the available themes, sorted alphabetically. Each name is
+ * usable as a `--theme` value or `BuildOptions.theme`.
+ */
+export function listThemes(): Promise<string[]> {
+  return listNames(THEMES_DIR);
+}
+
 async function resolveTemplateFile(name: string): Promise<string> {
   const file = path.join(TEMPLATES_DIR, name, "template.html");
   try {
