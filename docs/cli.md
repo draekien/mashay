@@ -42,12 +42,17 @@ npx @draekien/mashay --version
 document with the chosen template/theme, serves it from an in-memory local HTTP
 server, and opens it in your default browser — nothing is written to disk. It's
 for eyeballing a template/theme combination; the server runs until you stop it
-with Ctrl+C. `--template` defaults to `academic` and `--theme` defaults to the
-template name, same as `process`:
+with Ctrl+C.
+
+Run it with no flags and mashay prompts you to pick a template, then a theme,
+from those installed. Passing a flag locks that dimension in and skips its
+prompt, so you're only asked about what you left out; pass both flags to skip
+the picker entirely:
 
 ```bash
-npx @draekien/mashay preview
-npx @draekien/mashay preview --theme academic
+npx @draekien/mashay preview                    # pick template + theme interactively
+npx @draekien/mashay preview --template academic  # pick only the theme
+npx @draekien/mashay preview --template academic --theme academic  # no prompts
 ```
 
 `mashay docs [topic]` prints the Markdown formatting rules documented in

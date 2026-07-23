@@ -21,7 +21,8 @@ npx @draekien/mashay preview                       # preview a template/theme in
 Conversion is the `process` subcommand; each `<file>.md` becomes `<file>.html`
 in the output directory (`--out`, default `out`). `mashay preview` opens a
 built-in sample in your browser to try a template/theme combination without a
-file of your own. Running bare `mashay` prints help. See the
+file of your own, prompting you to pick the template and theme. Running bare
+`mashay` prints help. See the
 [CLI reference](./docs/cli.md) for installing, flags, and the `mashay docs`
 explorer.
 
