@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { readFileSync } from "node:fs";
+import { createServer } from "node:http";
 import path from "node:path";
 import {
   cancel,
@@ -14,7 +15,12 @@ import {
 } from "@clack/prompts";
 import chalk from "chalk";
 import { Command } from "commander";
-import { type BuildSummary, buildDocuments } from "./lib/build.js";
+import open from "open";
+import {
+  type BuildSummary,
+  buildDocuments,
+  renderToHtml,
+} from "./lib/build.js";
 import {
   aggregateExitCode,
   BuildError,
@@ -80,17 +86,19 @@ program
         await runInteractive(opts.out, opts.template, theme);
       }
     } catch (err) {
-      if (err instanceof BuildError) {
-        console.error(chalk.red(err.message));
-        process.exitCode = exitCodeForKind(err.kind);
-      } else {
-        console.error(
-          chalk.red(err instanceof Error ? err.message : String(err)),
-        );
-        process.exitCode = EXIT_UNEXPECTED;
-      }
+      reportError(err);
     }
   });
+
+function reportError(err: unknown): void {
+  if (err instanceof BuildError) {
+    console.error(chalk.red(err.message));
+    process.exitCode = exitCodeForKind(err.kind);
+  } else {
+    console.error(chalk.red(err instanceof Error ? err.message : String(err)));
+    process.exitCode = EXIT_UNEXPECTED;
+  }
+}
 
 async function runDirect(
   src: string,
@@ -258,5 +266,127 @@ async function runDocs(topicId: string | undefined): Promise<void> {
     if (topic) note(formatTopicBody(topic), topic.title);
   }
 }
+
+const PREVIEW_MARKDOWN = `---
+title: Template & Theme Preview
+description: A built-in sample document for previewing a template and theme combination.
+author: mashay
+date: 2026-07-23
+status: Draft
+version: "1.0"
+reviewers:
+  - Reviewer One
+  - Reviewer Two
+classification: Public
+changelog:
+  - version: "1.0"
+    date: 2026-07-23
+    description: Sample document used by the preview command.
+---
+
+## Introduction
+
+This document is rendered entirely from a built-in sample so you can see how a
+template and theme render prose, headings, lists, tables, code, and callouts
+without needing a file of your own.
+
+## Typography
+
+Body text sets the tone of a theme. It should stay readable across long
+passages, with comfortable line length and clear emphasis: **bold**, *italic*,
+and \`inline code\` all pull their weight here.
+
+### Lists
+
+- Grind size — finer grinds extract faster.
+- Water temperature — hotter water extracts more.
+- Contact time — longer steeping pulls more into the cup.
+
+### A table
+
+| Method       | Grind  | Time   |
+| ------------ | ------ | ------ |
+| Pour-over    | Medium | 3 min  |
+| French press | Coarse | 4 min  |
+| Espresso     | Fine   | 30 sec |
+
+### Code
+
+\`\`\`ts extraction.ts
+const strength = (grind: number, tempC: number, seconds: number) =>
+  (tempC / 100) * (seconds / 240) * (10 / grind);
+\`\`\`
+
+## Callouts
+
+> A good cup is repeatable — write down what you did, or you are only guessing.
+
+> [!NOTE]
+> Adjust the numbers above to taste rather than treating them as fixed.
+
+> [!TIP]
+> A 1:16 ratio of coffee to water is a reliable place to begin.
+
+> [!IMPORTANT]
+> Water is most of the cup; filtered water extracts far better than distilled.
+
+> [!WARNING]
+> Water above roughly 96 degrees Celsius pulls harsh, bitter notes.
+
+> [!CAUTION]
+> A sealed brewer under pressure can release scalding water suddenly.
+
+## Appendix
+
+### Methodology
+
+Sample content compiled to exercise the template's rendered elements.
+
+### Glossary
+
+- **Extraction** — dissolving soluble compounds from ground coffee into water.
+- **Immersion** — grounds steep in a fixed volume of water before separation.
+`;
+
+async function servePreview(html: string): Promise<void> {
+  const server = createServer((_req, res) => {
+    res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+    res.end(html);
+  });
+  await new Promise<void>((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", resolve);
+  });
+  const address = server.address();
+  const port = typeof address === "object" && address ? address.port : 0;
+  const url = `http://localhost:${port}`;
+  console.log(chalk.green("preview"), `serving at ${url}`);
+  console.log(chalk.dim("Press Ctrl+C to stop."));
+  await open(url);
+}
+
+program
+  .command("preview")
+  .description(
+    "Preview a template/theme combination in the browser with a built-in sample",
+  )
+  .option("--template <name>", "template to render with", "academic")
+  .option(
+    "--theme <name>",
+    "theme to style with (defaults to the template name)",
+  )
+  .action(async (opts: { template: string; theme?: string }) => {
+    const theme = opts.theme ?? opts.template;
+    try {
+      const { html } = await renderToHtml(
+        PREVIEW_MARKDOWN,
+        path.resolve(process.cwd(), "preview.md"),
+        { template: opts.template, theme },
+      );
+      await servePreview(html);
+    } catch (err) {
+      reportError(err);
+    }
+  });
 
 await program.parseAsync();

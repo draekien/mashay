@@ -38,6 +38,18 @@ resolved:
 npx @draekien/mashay --version
 ```
 
+`mashay preview [--template <name>] [--theme <name>]` renders a built-in sample
+document with the chosen template/theme, serves it from an in-memory local HTTP
+server, and opens it in your default browser — nothing is written to disk. It's
+for eyeballing a template/theme combination; the server runs until you stop it
+with Ctrl+C. `--template` defaults to `academic` and `--theme` defaults to the
+template name, same as `process`:
+
+```bash
+npx @draekien/mashay preview
+npx @draekien/mashay preview --theme academic
+```
+
 `mashay docs [topic]` prints the Markdown formatting rules documented in
 [Markdown conventions](./markdown.md) (frontmatter, headings, alerts, code
 blocks, mermaid, appendix, Obsidian syntax) — omit `[topic]` for an interactive
