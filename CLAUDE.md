@@ -58,6 +58,7 @@ lefthook runs on pre-commit: `pnpm typecheck`, then `biome check --write` on sta
 
 ## Design context
 
+- `PRODUCT.md` — the durable product record (users, purpose, positioning, binding constraints, brand, evidence) authored via the Impeccable `init` flow. It captures product truth only, never visual/aesthetic decisions (those live in `DESIGN.md`). Read it to understand who mashay is for and what future work must preserve; update it — not `DESIGN.md` — when product facts change.
 - `DESIGN.md` — the visual system spec (tokens, typography, components, do's/don'ts) for the `academic` template + theme, describing the CSS-custom-property token system in `themes/academic/theme.css`. Read it before changing a template, theme, or any rendered-HTML feature.
 
 ## Code style
