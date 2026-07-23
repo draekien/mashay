@@ -1,6 +1,6 @@
 ---
 name: mashay
-description: Visual system spec for the academic template and theme — token-driven, self-contained styled HTML from plain Markdown.
+description: Visual design system for mashay — the product-wide architecture, token contract, and invariants every template and theme upholds, with the academic template and its default harbor theme as the shipped reference pairing.
 colors:
   header-navy: "#023e5c"
   brand-teal: "#0c7e96"
@@ -74,30 +74,72 @@ components:
     padding: "32px 32px 24px"
 ---
 
-# Design System: the academic template + theme
+# Design System: mashay
 
 ## 1. Overview
 
-This is the visual-system spec for mashay's `academic` template and theme — the
-one template/theme pair that ships today. It is token-driven, and styling is
-split across two colocated layers:
+This is the visual design system for **mashay** as a product: the architecture,
+the token contract, and the invariants that hold for *every* template and theme
+mashay renders — not just the one that ships today. It has two levels:
 
-- **`themes/academic/theme.css` — colour tokens only.** A theme is a pure
+- **The system** — how styling is structured, the standardized token contract
+  every template is written against, and the cross-cutting rules
+  (self-containment, the numbered spine, accessibility, token-only styling) that
+  any template or theme must honour to belong to mashay.
+- **A template + theme** — one committed aesthetic built on that contract, each
+  bringing its own Creative North Star. One template ships (**academic**) with
+  six themes (**harbor** is the default, then **slate**, **oxblood**,
+  **forest**, **plum**, **sepia**); sections 2–6 document the **academic +
+  harbor** reference pairing. harbor's concrete colour tokens populate this
+  file's frontmatter, and every other theme reskins the same template by
+  overriding that `--color-*` set.
+
+### The two-layer architecture
+
+Styling is split across colocated layers so colour and everything-else vary
+independently:
+
+- **`themes/<name>/theme.css` — colour tokens only.** A theme is a pure
   palette: it defines just the standardized `--color-*` custom properties, the
   token contract every template is written against. A new theme is authored by
   overriding this same set of names with new values.
-- **`templates/academic/template.css` — everything template-specific.** The
-  non-colour design tokens (`--font-*`, `--spacing-*`, `--radius-*`,
-  `--transition-*`, `--z-*`), the component/structural rules, and the
-  `--tw-prose-*` mappings — all referencing the theme's colour tokens. The
-  template chrome and layout are built from Tailwind utility classes in
-  `template.html` (also referencing the colour tokens), and the Markdown body is
-  styled by `@tailwindcss/typography`'s `prose` classes with those
-  `--tw-prose-*` values re-asserted on top.
+- **`templates/<name>/template.css` + `template.html` — everything
+  template-specific.** The non-colour design tokens (`--font-*`, `--spacing-*`,
+  `--radius-*`, `--transition-*`, `--z-*`), the component/structural rules, and
+  the `--tw-prose-*` mappings — all referencing the theme's colour tokens. The
+  chrome and layout are Tailwind utility classes in `template.html` (also
+  referencing the colour tokens), and the Markdown body is styled by
+  `@tailwindcss/typography`'s `prose` classes with those `--tw-prose-*` values
+  re-asserted on top.
 
-Because the colour tokens are standardized, any theme pairs with any template. A
-new template brings its own `template.html` + `template.css`; a new theme only
-retunes the palette.
+Because the colour tokens are standardized, **any theme pairs with any
+template**. A new template brings its own `template.html` + `template.css`; a
+new theme only retunes the palette.
+
+### System invariants (every template & theme)
+
+These are product-level, not academic-specific — a new template or theme
+inherits them:
+
+- **Self-contained output.** Styles and any logo inline into a single HTML file;
+  web fonts are prohibited, so type comes from system-resident stacks. A feature
+  may pull a runtime CDN dependency (as a Mermaid diagram loads its renderer at
+  view time) only when it is declared to require network access to render.
+- **Token-only styling.** Every colour, space, radius, and duration is a
+  `var(--*)` reference — no raw hex, px, or z-index (see **The Token Rule**). A
+  theme retunes the whole look by overriding tokens.
+- **The numbered spine.** Generated heading numbering (1, 1.1, A for appendices)
+  with `tabular-nums` in the TOC is mashay's structural signature; a template
+  preserves it rather than inventing competing markers (see **The Numbered Spine
+  Rule**).
+- **Accessibility floor.** Body text clears WCAG AA (4.5:1); every transition
+  pairs an explicit property + easing with a `prefers-reduced-motion: reduce`
+  override.
+- **Authority from structure, not decoration.** The rendered document earns
+  trust through numbering, hierarchy, and ruled dividers — never gradients,
+  hype, or ornament.
+
+### The academic reference implementation
 
 **Creative North Star: "The Executive Brief"**
 
@@ -108,8 +150,8 @@ prepared, authoritative brief, not a rendered README. Design authority comes
 from structure — numbering, ruled dividers, a branded masthead — never from
 decoration.
 
-The system is a strict application of the design tokens (colours in
-`themes/academic/theme.css`, the rest in `templates/academic/template.css`). It
+academic is a strict application of the design tokens (colours in
+`themes/harbor/theme.css`, the rest in `templates/academic/template.css`). It
 explicitly rejects generic SaaS marketing (no
 gradients, no hype), the dry Word-doc export (unstyled walls of text), the
 dev-tool README (monospace-heavy, unstyled), and academic-paper austerity. It
@@ -117,7 +159,7 @@ is a reading surface: a single measured column (max 44rem, ~70ch) on white
 paper, flanked by a quiet navigation rail, opened by a deep-navy masthead that
 carries the entire accent moment.
 
-**Key Characteristics:**
+**academic's key characteristics:**
 - Token-only styling — every color, space, radius, and duration is a `var(--*)` reference defined in the theme, so a new theme retunes the whole look by overriding tokens.
 - One saturated accent moment (the navy masthead); the body is calm ink-on-paper.
 - Structure as ornament: numbered heading chips, tabular TOC numerals, ruled section breaks.
@@ -125,6 +167,10 @@ carries the entire accent moment.
 - Self-contained output: styles and any logo inline in a single HTML file.
 
 ## 2. Colors
+
+Sections 2–6 document the **academic** reference implementation. Rules marked
+*(system-wide)* are invariants every template/theme inherits; the rest are
+academic's own expression of them.
 
 A restrained strategy: ink on paper with one teal voice, anchored by a single
 drenched navy masthead.
@@ -154,9 +200,9 @@ Status colors follow the semantic scales: alert callouts use
 **The One Masthead Rule.** Header Navy appears exactly once, as the document
 masthead. The body never uses dark or saturated surfaces except code blocks.
 
-**The Token Rule.** No raw hex, px, or z-index values — prohibited. Every value
-resolves to a `--color-*`, `--spacing-*`, `--radius-*`, `--shadow-*`, `--z-*`,
-or `--transition-*` token from the token set.
+**The Token Rule** *(system-wide).* No raw hex, px, or z-index values —
+prohibited. Every value resolves to a `--color-*`, `--spacing-*`, `--radius-*`,
+`--shadow-*`, `--z-*`, or `--transition-*` token from the token set.
 
 ## 3. Typography
 
@@ -178,14 +224,15 @@ self-contained, so web fonts are prohibited.
 - **Label** (700, 0.6875–0.75rem sans, 0.05–0.06em tracking, UPPERCASE): masthead eyebrow, metadata labels, table and code headers — the "brief stamp" voice.
 
 ### Named Rules
-**The Numbered Spine Rule.** Every `h2`/`h3`/`h4` carries generated numbering
-(1, 1.1, A for appendices) with `tabular-nums` in the TOC. Numbering is the
-document's spine; never suppress it or add competing markers.
+**The Numbered Spine Rule** *(system-wide).* Every `h2`/`h3`/`h4` carries
+generated numbering (1, 1.1, A for appendices) with `tabular-nums` in the TOC.
+Numbering is the document's spine; never suppress it or add competing markers.
 
 **The Two Voices Rule.** Serif is for reading (body prose, blockquotes, the
 masthead subtitle in italic); sans is for structure (headings, labels, TOC,
-tables, alert titles). Never mix the voices within one role, and never load a
-web font — self-containment outranks typographic novelty.
+tables, alert titles). Never mix the voices within one role. Never load a web
+font *(system-wide)* — self-containment outranks typographic novelty, and this
+holds for every template and theme.
 
 ## 4. Elevation
 
@@ -241,6 +288,11 @@ shadows.
 - **Style:** centered inside a ruled container, `zoom-in` cursor; click opens the lightbox (scrim + white panel, `zoom-out` to dismiss).
 
 ## 6. Do's and Don'ts
+
+The token, numbered-spine, self-containment, and accessibility do's below are
+system-wide invariants; the anti-references (no SaaS marketing, Word-doc export,
+dev-tool README, or academic-paper density) are academic's committed rejections,
+which a future template may restate in its own terms.
 
 ### Do:
 - **Do** reference tokens for every value — colors, spacing (4px grid), radii (2/4/8px), transitions. The Token Rule is absolute.

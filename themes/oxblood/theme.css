@@ -1,0 +1,61 @@
+/*
+ * Oxblood theme — colour tokens.
+ *
+ * Warm print palette: deep burgundy masthead, brick-red working accent, brass
+ * badge, on warm ivory paper. Reads like a legal brief or an editorial page.
+ *
+ * A theme is a pure palette. It defines ONLY colour tokens, using the
+ * standardized token contract that every mashay template is written against:
+ * the same custom-property names appear in every theme, and only their values
+ * differ. Swapping `--theme` swaps these values; the template's own CSS
+ * (templates/<name>/template.css) maps them onto components. Any theme can
+ * therefore pair with any template.
+ */
+
+:root {
+  --color-background: #fffdf9;
+  --color-text: #2a1e1e;
+
+  --color-neutral-000: #ffffff;
+  --color-neutral-100: #faf6f1;
+  --color-neutral-200: #f2ebe3;
+  --color-neutral-300: #e3d7cb;
+  --color-neutral-400: #d2c3b4;
+  --color-neutral-500: #bfae9d;
+  --color-neutral-600: #7c6a5c;
+  --color-neutral-700: #574a40;
+  --color-neutral-1000: #17110f;
+
+  --color-primary-100: #fbeeee;
+  --color-primary-400: #f0a9a0;
+  --color-primary-600: #a83232;
+
+  --color-secondary-400: #eccf8f;
+  --color-secondary-500: #dcb457;
+  --color-secondary-600: #c69128;
+  --color-secondary-1000: #251c0c;
+
+  --color-tertiary-400: #e0a7a0;
+  --color-tertiary-500: #cf7f78;
+  --color-tertiary-700: #7a2530;
+  --color-tertiary-900: #4a151c;
+
+  --color-information-100: #f2fbfd;
+  --color-information-300: #c5edf6;
+  --color-information-800: #034e5e;
+
+  --color-success-100: #f1f9f3;
+  --color-success-300: #ccf0d7;
+  --color-success-800: #006629;
+
+  --color-alert-100: #fcf5ee;
+  --color-alert-300: #fae0c2;
+  --color-alert-800: #b44a04;
+
+  --color-error-100: #fff5f5;
+  --color-error-300: #ffbdbf;
+  --color-error-400: #ff8589;
+  --color-error-800: #a30005;
+
+  --color-overlay: rgba(42, 30, 30, 0.5);
+}

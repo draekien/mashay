@@ -1,0 +1,61 @@
+/*
+ * Slate theme — colour tokens.
+ *
+ * Cool technical palette: indigo working accent, blue-grey neutrals, a near-black
+ * indigo masthead. Reads like an engineering spec.
+ *
+ * A theme is a pure palette. It defines ONLY colour tokens, using the
+ * standardized token contract that every mashay template is written against:
+ * the same custom-property names appear in every theme, and only their values
+ * differ. Swapping `--theme` swaps these values; the template's own CSS
+ * (templates/<name>/template.css) maps them onto components. Any theme can
+ * therefore pair with any template.
+ */
+
+:root {
+  --color-background: #ffffff;
+  --color-text: #1b2130;
+
+  --color-neutral-000: #ffffff;
+  --color-neutral-100: #f6f7fb;
+  --color-neutral-200: #eceef6;
+  --color-neutral-300: #d6dae8;
+  --color-neutral-400: #c0c6da;
+  --color-neutral-500: #a8b0c8;
+  --color-neutral-600: #656d85;
+  --color-neutral-700: #454c62;
+  --color-neutral-1000: #0d1120;
+
+  --color-primary-100: #eef0fc;
+  --color-primary-400: #b3bdf0;
+  --color-primary-600: #3d4db0;
+
+  --color-secondary-400: #ffd98f;
+  --color-secondary-500: #f7c25a;
+  --color-secondary-600: #f0a01e;
+  --color-secondary-1000: #2a2314;
+
+  --color-tertiary-400: #b7c2ec;
+  --color-tertiary-500: #93a1de;
+  --color-tertiary-700: #3d4f8a;
+  --color-tertiary-900: #1c2547;
+
+  --color-information-100: #f2fbfd;
+  --color-information-300: #c5edf6;
+  --color-information-800: #034e5e;
+
+  --color-success-100: #f1f9f3;
+  --color-success-300: #ccf0d7;
+  --color-success-800: #006629;
+
+  --color-alert-100: #fcf5ee;
+  --color-alert-300: #fae0c2;
+  --color-alert-800: #b44a04;
+
+  --color-error-100: #fff5f5;
+  --color-error-300: #ffbdbf;
+  --color-error-400: #ff8589;
+  --color-error-800: #a30005;
+
+  --color-overlay: rgba(27, 33, 48, 0.5);
+}

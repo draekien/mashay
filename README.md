@@ -30,7 +30,7 @@ explorer.
 
 - [CLI reference](./docs/cli.md) — commands, flags, interactive mode, installing
 - [Exit codes](./docs/exit-codes.md) — what each `process` exit code means
-- [Templates and themes](./docs/templates-and-themes.md) — layout vs. styling, `--template`/`--theme`
+- [Templates and themes](./docs/templates-and-themes.md) — layout vs. styling, `--template`/`--theme`, and the bundled themes (`harbor`, `slate`, `oxblood`, `forest`, `plum`, `sepia`)
 - [Markdown conventions](./docs/markdown.md) — frontmatter, headings, alerts, code blocks, mermaid, appendix, Obsidian syntax
 - [Contributing](./docs/contributing.md) — project layout, development commands, publishing
 

@@ -18,6 +18,26 @@ import { buildToc } from "./toc.js";
 const PACKAGE_ROOT = path.resolve(import.meta.dirname, "..");
 const TEMPLATES_DIR = path.join(PACKAGE_ROOT, "templates");
 const THEMES_DIR = path.join(PACKAGE_ROOT, "themes");
+
+/**
+ * The theme applied when none is chosen. Themes are named independently of
+ * templates, so this is an explicit default rather than the template's name.
+ */
+export const DEFAULT_THEME = "harbor";
+
+/** The template applied when none is chosen. */
+export const DEFAULT_TEMPLATE = "academic";
+
+// Colour tokens sampled to preview a theme in the interactive picker, in the
+// order they read as a palette strip: paper, working accent, masthead, badge,
+// ink.
+const SWATCH_TOKENS = [
+  "background",
+  "primary-600",
+  "tertiary-900",
+  "secondary-600",
+  "text",
+] as const;
 const MERMAID_CDN_URL =
   "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js";
 
@@ -250,6 +270,34 @@ export function listTemplates(): Promise<string[]> {
  */
 export function listThemes(): Promise<string[]> {
   return listNames(THEMES_DIR);
+}
+
+/** A theme name paired with a short strip of its representative colours. */
+export interface ThemeSwatch {
+  name: string;
+  colors: string[];
+}
+
+async function readSwatchColors(name: string): Promise<string[]> {
+  const css = await readFile(path.join(THEMES_DIR, name, "theme.css"), "utf8");
+  return SWATCH_TOKENS.map((token) => {
+    const match = css.match(
+      new RegExp(`--color-${token}:\\s*(#[0-9a-fA-F]{6})`),
+    );
+    return match ? match[1] : "#000000";
+  });
+}
+
+/**
+ * Lists the available themes, each with a strip of representative hex colours
+ * (paper, accent, masthead, badge, ink) for rendering a palette preview in the
+ * interactive theme picker. Sorted alphabetically by name.
+ */
+export async function listThemeSwatches(): Promise<ThemeSwatch[]> {
+  const names = await listNames(THEMES_DIR);
+  return Promise.all(
+    names.map(async (name) => ({ name, colors: await readSwatchColors(name) })),
+  );
 }
 
 async function resolveTemplateFile(name: string): Promise<string> {

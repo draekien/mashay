@@ -29,6 +29,7 @@ lefthook runs on pre-commit: `pnpm typecheck`, then `biome check --write` on sta
 
 - `pnpm test` — runs `pretest` (`pnpm run build`) then `vitest run`. Tests exercise the built CLI/pipeline, so a stale or missing `dist/` isn't an issue.
 - `src/lib/frontmatter.test.ts`, `toc.test.ts`, `file-discovery.test.ts` — unit tests for those modules.
+- `src/themes.contrast.test.ts` — parses every `themes/<name>/theme.css` and asserts each rendered-as-text token pair clears the WCAG AA 4.5:1 floor; a new theme is covered automatically, no wiring.
 - `src/lib/pipeline.test.ts` — black-box tests of the composed unified/remark/rehype `processor` (alerts, heading numbering, mermaid, appendix wrapping).
 - `src/cli.integration.test.ts` — spawns the real built `dist/cli.js` against the fixtures in `examples/`.
 - HTML output is asserted with vitest snapshots (`__snapshots__/*.snap`). When a snapshot changes, review the diff manually against the expected behavior rather than blindly re-running with `-u` — a snapshot can silently bless a regression.
@@ -37,7 +38,7 @@ lefthook runs on pre-commit: `pnpm typecheck`, then `biome check --write` on sta
 
 ## Template/theme architecture
 
-- Layout and styling are separated across three colocated files. A template is `templates/<name>/template.html` (HTML skeleton, chrome authored with Tailwind utilities referencing `var(--color-*)` tokens) plus a colocated `templates/<name>/template.css` (non-colour tokens `--font/spacing/radius/transition/z-*`, the component CSS layer, and the typography plugin's `--tw-prose-*` mappings). A theme is `themes/<name>/theme.css` and contains **colour tokens only** — a standardized `--color-*` set that every template is written against, so any theme pairs with any template. `build.ts` compiles `@import "tailwindcss"` + typography plugin + theme colours + template CSS per document (a fresh compiler per doc — `compiler.build` accumulates candidates otherwise). One template/theme ships: `academic`. They default-pair but mix-and-match is supported via `--template`/`--theme`; unknown names error with the available list.
+- Layout and styling are separated across three colocated files. A template is `templates/<name>/template.html` (HTML skeleton, chrome authored with Tailwind utilities referencing `var(--color-*)` tokens) plus a colocated `templates/<name>/template.css` (non-colour tokens `--font/spacing/radius/transition/z-*`, the component CSS layer, and the typography plugin's `--tw-prose-*` mappings). A theme is `themes/<name>/theme.css` and contains **colour tokens only** — a standardized `--color-*` set that every template is written against, so any theme pairs with any template. `build.ts` compiles `@import "tailwindcss"` + typography plugin + theme colours + template CSS per document (a fresh compiler per doc — `compiler.build` accumulates candidates otherwise). One template ships (`academic`) plus six themes: `harbor` (the default), `slate`, `oxblood`, `forest`, `plum`, `sepia`. Template and theme are chosen independently via `--template`/`--theme`; the default theme is decoupled from the template name — it is `DEFAULT_THEME` (`harbor`) in `build.ts`, not the template's name. Unknown names error with the available list. Every theme is colour-only and must clear the AA contrast floor asserted by `src/themes.contrast.test.ts`, which auto-discovers each `themes/<name>/`.
 - `src/lib/build.ts` resolves the template/theme, then compiles the theme with Tailwind v4 + `@tailwindcss/typography`, scans each assembled page for used classes, and inlines only the needed CSS into a single `<style>` — so output is one self-contained `.html`. A document with a Mermaid diagram is the one exception: it loads the Mermaid renderer from a CDN at view time.
 
 ## Skill maintenance
@@ -58,7 +59,8 @@ lefthook runs on pre-commit: `pnpm typecheck`, then `biome check --write` on sta
 
 ## Design context
 
-- `DESIGN.md` — the visual system spec (tokens, typography, components, do's/don'ts) for the `academic` template + theme, describing the CSS-custom-property token system in `themes/academic/theme.css`. Read it before changing a template, theme, or any rendered-HTML feature.
+- `PRODUCT.md` — the durable product record (users, purpose, positioning, binding constraints, brand, evidence) authored via the Impeccable `init` flow. It captures product truth only, never visual/aesthetic decisions (those live in `DESIGN.md`). Read it to understand who mashay is for and what future work must preserve; update it — not `DESIGN.md` — when product facts change.
+- `DESIGN.md` — the visual system spec (tokens, typography, components, do's/don'ts) for the `academic` template + its default `harbor` theme, describing the CSS-custom-property token system in `themes/harbor/theme.css`. Read it before changing a template, theme, or any rendered-HTML feature.
 
 ## Code style
 
