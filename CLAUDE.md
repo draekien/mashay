@@ -42,15 +42,15 @@ lefthook runs on pre-commit: `pnpm typecheck`, then `biome check --write` on sta
 
 ## Skill maintenance
 
-- `.claude/skills/using-mashay/SKILL.md` documents CLI usage and Markdown authoring rules for agents encountering this repo cold. When CLI behavior changes (frontmatter fields, CLI flags/args, template/theme model, TOC/appendix/heading-numbering rules, alert blockquote markers, Mermaid handling), update this skill in the same change so it doesn't drift from actual behavior.
-- `src/lib/formatting-docs.ts` backs the `mashay docs` CLI command and mirrors this skill's rules — update both together.
+- `.claude/skills/using-mashay/SKILL.md` orients agents encountering this repo cold. It deliberately does **not** reproduce the mutable rule tables (frontmatter fields, flags, alert markers, exit codes, appendix/TOC specifics); it defers those to `mashay docs`/`--help` so it can't drift from actual behavior. Keep it that way — when CLI behavior changes, the fix is `src/lib/formatting-docs.ts` (which backs `mashay docs`), not the skill. Only touch the skill when a durable mental model, invocation pattern, or gotcha it teaches actually changes.
+- `src/lib/formatting-docs.ts` backs the `mashay docs` CLI command and is the source of truth the skill points agents at.
 - The skill is distributed standalone via `npx skills`, so its body must reference only files bundled under the skill directory (`assets/`), never repo-relative paths like `../../../examples/`. `.claude/skills/using-mashay/assets/example.md` and `assets/example-obsidian.md` are copies of `examples/example.md` and `examples/example-obsidian.md` — keep them in sync when the examples change.
 
 ## Docs maintenance
 
 - `README.md` is a lean landing page (what mashay is, a quick-start, a docs index, the skill install, license); the detailed docs live in `docs/`. Keep both in sync with code the same way `SKILL.md` is: a change to the behavior a doc describes updates that doc in the same change.
-- Which file covers what: `docs/cli.md` (subcommands, flags/args, interactive mode, installing), `docs/exit-codes.md` (the exit-code taxonomy — mirrors `src/lib/errors.ts` and `mashay docs exit-codes`), `docs/templates-and-themes.md` (the template/theme model), `docs/markdown.md` (frontmatter fields, headings/TOC, alerts, code blocks, mermaid, appendix, Obsidian syntax — mirrors `src/lib/formatting-docs.ts` and `SKILL.md`), `docs/contributing.md` (project layout, dev commands, publishing).
-- The Markdown authoring rules now have three sources of truth to update together: `docs/markdown.md`, `src/lib/formatting-docs.ts`, and the `using-mashay` skill. The exit-code table has two: `docs/exit-codes.md` and `EXIT_CODE_TABLE` in `src/lib/errors.ts`. README/docs cross-links are repo-relative (`./docs/*.md`, `../examples/*`) — keep them resolving when files move.
+- Which file covers what: `docs/cli.md` (subcommands, flags/args, interactive mode, installing), `docs/exit-codes.md` (the exit-code taxonomy — mirrors `src/lib/errors.ts` and `mashay docs exit-codes`), `docs/templates-and-themes.md` (the template/theme model), `docs/markdown.md` (frontmatter fields, headings/TOC, alerts, code blocks, mermaid, appendix, Obsidian syntax — mirrors `src/lib/formatting-docs.ts`), `docs/contributing.md` (project layout, dev commands, publishing).
+- The Markdown authoring rules have two sources of truth to update together: `docs/markdown.md` and `src/lib/formatting-docs.ts` (the `using-mashay` skill defers to the latter via `mashay docs` rather than duplicating the rules). The exit-code table has two: `docs/exit-codes.md` and `EXIT_CODE_TABLE` in `src/lib/errors.ts`. README/docs cross-links are repo-relative (`./docs/*.md`, `../examples/*`) — keep them resolving when files move.
 
 ## Gotchas
 
