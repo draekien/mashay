@@ -13,11 +13,14 @@ mashay separates *layout* from *styling*:
   shared, any theme pairs with any template.
 
 Select them with `--template <name>` (default `academic`) and `--theme <name>`
-(defaults to the template's name). One template and one theme ship today, both
-named `academic`; they pair by default, but you can mix and match:
+(default `harbor`). One template ships — `academic` — alongside six themes:
+`harbor` (the default), `slate`, `oxblood`, `forest`, `plum`, and `sepia`.
+Template and theme are chosen independently, so any theme pairs with any
+template:
 
 ```bash
-mashay process ./my-doc.md --template academic --theme academic
+mashay process ./my-doc.md --theme sepia
+mashay process ./my-doc.md --template academic --theme slate
 ```
 
 Unknown template or theme names error with the list of available names. The

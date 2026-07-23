@@ -18,6 +18,12 @@ import { buildToc } from "./toc.js";
 const PACKAGE_ROOT = path.resolve(import.meta.dirname, "..");
 const TEMPLATES_DIR = path.join(PACKAGE_ROOT, "templates");
 const THEMES_DIR = path.join(PACKAGE_ROOT, "themes");
+
+/**
+ * The theme applied when none is chosen. Themes are named independently of
+ * templates, so this is an explicit default rather than the template's name.
+ */
+export const DEFAULT_THEME = "harbor";
 const MERMAID_CDN_URL =
   "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js";
 

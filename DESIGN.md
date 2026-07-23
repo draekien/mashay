@@ -1,6 +1,6 @@
 ---
 name: mashay
-description: Visual design system for mashay — the product-wide architecture, token contract, and invariants every template and theme upholds, with the academic template + theme as the shipped reference implementation.
+description: Visual design system for mashay — the product-wide architecture, token contract, and invariants every template and theme upholds, with the academic template and its default harbor theme as the shipped reference pairing.
 colors:
   header-navy: "#023e5c"
   brand-teal: "#0c7e96"
@@ -87,9 +87,12 @@ mashay renders — not just the one that ships today. It has two levels:
   (self-containment, the numbered spine, accessibility, token-only styling) that
   any template or theme must honour to belong to mashay.
 - **A template + theme** — one committed aesthetic built on that contract, each
-  bringing its own Creative North Star. Exactly one ships today: **academic**,
-  documented in sections 2–6 as the reference implementation. Its concrete
-  tokens populate this file's frontmatter.
+  bringing its own Creative North Star. One template ships (**academic**) with
+  six themes (**harbor** is the default, then **slate**, **oxblood**,
+  **forest**, **plum**, **sepia**); sections 2–6 document the **academic +
+  harbor** reference pairing. harbor's concrete colour tokens populate this
+  file's frontmatter, and every other theme reskins the same template by
+  overriding that `--color-*` set.
 
 ### The two-layer architecture
 
@@ -148,7 +151,7 @@ from structure — numbering, ruled dividers, a branded masthead — never from
 decoration.
 
 academic is a strict application of the design tokens (colours in
-`themes/academic/theme.css`, the rest in `templates/academic/template.css`). It
+`themes/harbor/theme.css`, the rest in `templates/academic/template.css`). It
 explicitly rejects generic SaaS marketing (no
 gradients, no hype), the dry Word-doc export (unstyled walls of text), the
 dev-tool README (monospace-heavy, unstyled), and academic-paper austerity. It

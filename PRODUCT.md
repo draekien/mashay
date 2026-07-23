@@ -74,9 +74,10 @@ blockquotes; build-time code syntax highlighting; Mermaid diagrams; an appendix
 section; and Obsidian-vault syntax. A template/theme architecture separates a
 `template` (HTML skeleton + non-colour tokens + component CSS) from a `theme`
 (a standardized `--color-*` palette), compiled per document with Tailwind v4 +
-`@tailwindcss/typography`. One template/theme ships today: `academic`.
-`--template`/`--theme` mix and match; unknown names error with the available
-list.
+`@tailwindcss/typography`. One template ships (`academic`) alongside six themes
+(`harbor` — the default — `slate`, `oxblood`, `forest`, `plum`, `sepia`).
+`--template`/`--theme` mix and match, chosen independently; unknown names error
+with the available list.
 
 Durable constraints future work must preserve:
 
@@ -100,13 +101,16 @@ layering metaphor; keep that spelling and pronunciation.
 
 - `examples/` — real Markdown fixtures (`example.md`, `example-obsidian.md`) used
   by the CLI and integration tests.
-- `DESIGN.md` — the visual-system spec for the `academic` template and theme.
+- `DESIGN.md` — the visual-system spec, written against the `academic` template
+  and its default `harbor` theme as the reference pairing.
 - `docs/` — CLI, exit-code, template/theme, Markdown, and contributing
   references; `README.md` is the landing page.
 - `.claude/skills/using-mashay/` — the distributed agent skill.
 
-Only the `academic` template/theme exists today; there is no second template or
-theme yet, and none should be implied.
+One template (`academic`) exists today; there is no second template yet, and
+none should be implied. Six themes ship (`harbor`, `slate`, `oxblood`, `forest`,
+`plum`, `sepia`); `harbor` is the default and the reference the visual spec is
+written against.
 
 ## Product Principles
 

@@ -1,0 +1,61 @@
+/*
+ * Forest theme — colour tokens.
+ *
+ * Earthy calm palette: deep pine masthead, green working accent, ochre badge, on
+ * warm off-white paper. Reads like a field report or a sustainability document.
+ *
+ * A theme is a pure palette. It defines ONLY colour tokens, using the
+ * standardized token contract that every mashay template is written against:
+ * the same custom-property names appear in every theme, and only their values
+ * differ. Swapping `--theme` swaps these values; the template's own CSS
+ * (templates/<name>/template.css) maps them onto components. Any theme can
+ * therefore pair with any template.
+ */
+
+:root {
+  --color-background: #fffef9;
+  --color-text: #1c241d;
+
+  --color-neutral-000: #ffffff;
+  --color-neutral-100: #f5f8f3;
+  --color-neutral-200: #eaf0e6;
+  --color-neutral-300: #d5ded0;
+  --color-neutral-400: #c0cbba;
+  --color-neutral-500: #a7b3a0;
+  --color-neutral-600: #66735f;
+  --color-neutral-700: #454f40;
+  --color-neutral-1000: #0e130d;
+
+  --color-primary-100: #ecf6ec;
+  --color-primary-400: #8fd79a;
+  --color-primary-600: #2f7d3f;
+
+  --color-secondary-400: #f0d18f;
+  --color-secondary-500: #e3b256;
+  --color-secondary-600: #cf9526;
+  --color-secondary-1000: #241c0c;
+
+  --color-tertiary-400: #a6d3b4;
+  --color-tertiary-500: #6fb885;
+  --color-tertiary-700: #1f6b3f;
+  --color-tertiary-900: #143b25;
+
+  --color-information-100: #f2fbfd;
+  --color-information-300: #c5edf6;
+  --color-information-800: #034e5e;
+
+  --color-success-100: #f1f9f3;
+  --color-success-300: #ccf0d7;
+  --color-success-800: #006629;
+
+  --color-alert-100: #fcf5ee;
+  --color-alert-300: #fae0c2;
+  --color-alert-800: #b44a04;
+
+  --color-error-100: #fff5f5;
+  --color-error-300: #ffbdbf;
+  --color-error-400: #ff8589;
+  --color-error-800: #a30005;
+
+  --color-overlay: rgba(28, 36, 29, 0.5);
+}

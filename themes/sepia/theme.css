@@ -1,0 +1,61 @@
+/*
+ * Sepia theme — colour tokens.
+ *
+ * Warm reading palette: parchment paper, brown ink, deep espresso masthead, and
+ * a muted terracotta working accent. A calm, long-form "reading mode" surface.
+ *
+ * A theme is a pure palette. It defines ONLY colour tokens, using the
+ * standardized token contract that every mashay template is written against:
+ * the same custom-property names appear in every theme, and only their values
+ * differ. Swapping `--theme` swaps these values; the template's own CSS
+ * (templates/<name>/template.css) maps them onto components. Any theme can
+ * therefore pair with any template.
+ */
+
+:root {
+  --color-background: #fbf5e9;
+  --color-text: #2e2013;
+
+  --color-neutral-000: #fffdf7;
+  --color-neutral-100: #f6eedd;
+  --color-neutral-200: #efe4cf;
+  --color-neutral-300: #e0d1b6;
+  --color-neutral-400: #cdb89a;
+  --color-neutral-500: #b7a17f;
+  --color-neutral-600: #7a6a4f;
+  --color-neutral-700: #574a37;
+  --color-neutral-1000: #211812;
+
+  --color-primary-100: #f7e9df;
+  --color-primary-400: #eaa98c;
+  --color-primary-600: #b5502e;
+
+  --color-secondary-400: #f0cf8f;
+  --color-secondary-500: #e0b055;
+  --color-secondary-600: #c68f24;
+  --color-secondary-1000: #241b0b;
+
+  --color-tertiary-400: #d8b48c;
+  --color-tertiary-500: #c2914f;
+  --color-tertiary-700: #6b4423;
+  --color-tertiary-900: #3a2415;
+
+  --color-information-100: #f2fbfd;
+  --color-information-300: #c5edf6;
+  --color-information-800: #034e5e;
+
+  --color-success-100: #f1f9f3;
+  --color-success-300: #ccf0d7;
+  --color-success-800: #006629;
+
+  --color-alert-100: #fcf5ee;
+  --color-alert-300: #fae0c2;
+  --color-alert-800: #b44a04;
+
+  --color-error-100: #fff5f5;
+  --color-error-300: #ffbdbf;
+  --color-error-400: #ff8589;
+  --color-error-800: #a30005;
+
+  --color-overlay: rgba(46, 32, 19, 0.5);
+}

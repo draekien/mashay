@@ -52,7 +52,7 @@ the picker entirely:
 ```bash
 npx @draekien/mashay preview                    # pick template + theme interactively
 npx @draekien/mashay preview --template academic  # pick only the theme
-npx @draekien/mashay preview --template academic --theme academic  # no prompts
+npx @draekien/mashay preview --template academic --theme harbor  # no prompts
 ```
 
 `mashay docs [topic]` prints the Markdown formatting rules documented in

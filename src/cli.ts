@@ -19,6 +19,7 @@ import open from "open";
 import {
   type BuildSummary,
   buildDocuments,
+  DEFAULT_THEME,
   listTemplates,
   listThemes,
   renderToHtml,
@@ -73,14 +74,11 @@ program
   )
   .option("--out <dir>", "output directory", "out")
   .option("--template <name>", "template to render with", "academic")
-  .option(
-    "--theme <name>",
-    "theme to style with (defaults to the template name)",
-  )
+  .option("--theme <name>", "theme to style with (defaults to harbor)")
   // `mashay process <src>` builds directly; `mashay process` (no src) drops into
   // interactive file-picking.
   .action(async (src: string | undefined, opts: BuildFlags) => {
-    const theme = opts.theme ?? opts.template;
+    const theme = opts.theme ?? DEFAULT_THEME;
     try {
       if (src) {
         await runDirect(src, opts.out, opts.template, theme);
@@ -404,7 +402,7 @@ async function resolvePreviewSelection(opts: {
 
   let theme = opts.theme;
   if (!theme) {
-    const choice = await pickName("theme", await listThemes(), template);
+    const choice = await pickName("theme", await listThemes(), DEFAULT_THEME);
     if (isCancel(choice)) {
       cancel("Cancelled");
       return undefined;
@@ -421,10 +419,7 @@ program
     "Preview a template/theme combination in the browser with a built-in sample",
   )
   .option("--template <name>", "template to render with")
-  .option(
-    "--theme <name>",
-    "theme to style with (defaults to the template name)",
-  )
+  .option("--theme <name>", "theme to style with (defaults to harbor)")
   .action(async (opts: { template?: string; theme?: string }) => {
     try {
       const selection = await resolvePreviewSelection(opts);

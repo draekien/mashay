@@ -6,7 +6,8 @@
 templates/
   academic/    template.html (Tailwind chrome) + template.css (components, non-colour tokens, prose)
 themes/
-  academic/    theme.css — colour tokens only (standardized --color-* set)
+  harbor/      theme.css — colour tokens only (standardized --color-* set); default
+  slate/ oxblood/ forest/ plum/ sepia/   additional colour palettes
 examples/
   example.md           Neutral sample exercising every feature
   example-obsidian.md  Obsidian-vault syntax sample
