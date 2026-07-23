@@ -15,12 +15,15 @@ Run it from anywhere without installing anything permanently:
 npx @draekien/mashay process ./my-doc.md          # build one file
 npx @draekien/mashay process ./docs --out ./html  # build a directory
 npx @draekien/mashay process                      # pick files interactively
+npx @draekien/mashay preview                       # preview a template/theme in the browser
 ```
 
 Conversion is the `process` subcommand; each `<file>.md` becomes `<file>.html`
-in the output directory (`--out`, default `out`). Running bare `mashay` prints
-help. See the [CLI reference](./docs/cli.md) for installing, flags, and the
-`mashay docs` explorer.
+in the output directory (`--out`, default `out`). `mashay preview` opens a
+built-in sample in your browser to try a template/theme combination without a
+file of your own. Running bare `mashay` prints help. See the
+[CLI reference](./docs/cli.md) for installing, flags, and the `mashay docs`
+explorer.
 
 ## Documentation
 

@@ -91,15 +91,14 @@ async function resolveLogo(
   }
 }
 
-async function renderHtml(
+async function assemblePage(
   assets: TemplateAssets,
   frontmatter: Frontmatter,
   logo: string,
   content: string,
   srcPath: string,
   base: string,
-  outDir: string,
-): Promise<{ outName: string; hasMermaid: boolean }> {
+): Promise<{ page: string; hasMermaid: boolean }> {
   const file = await processor.process(
     new VFile({ value: content, path: srcPath }),
   );
@@ -138,26 +137,35 @@ async function renderHtml(
   const styles = await compilePageCss(assets.cssInput, page);
   const finalPage = page.replace("{{styles}}", () => styles);
 
-  const outName = `${base}.html`;
-  await writeFile(path.join(outDir, outName), finalPage, "utf8");
-  return { outName, hasMermaid: Boolean(file.data.hasMermaid) };
+  return { page: finalPage, hasMermaid: Boolean(file.data.hasMermaid) };
 }
 
-async function renderOne(
+async function renderHtml(
   assets: TemplateAssets,
+  frontmatter: Frontmatter,
+  logo: string,
+  content: string,
   srcPath: string,
+  base: string,
   outDir: string,
-): Promise<{ outNames: string[]; hasMermaid: boolean }> {
-  let raw: string;
-  try {
-    raw = await readFile(srcPath, "utf8");
-  } catch (err) {
-    throw new BuildError(
-      "source-read",
-      `could not read ${srcPath}: ${reason(err)}`,
-    );
-  }
+): Promise<{ outName: string; hasMermaid: boolean }> {
+  const { page, hasMermaid } = await assemblePage(
+    assets,
+    frontmatter,
+    logo,
+    content,
+    srcPath,
+    base,
+  );
+  const outName = `${base}.html`;
+  await writeFile(path.join(outDir, outName), page, "utf8");
+  return { outName, hasMermaid };
+}
 
+function parseDocument(
+  raw: string,
+  srcPath: string,
+): { frontmatter: Frontmatter; content: string } {
   let data: { [key: string]: unknown };
   let content: string;
   try {
@@ -178,7 +186,25 @@ async function renderOne(
       formatFrontmatterError(srcPath, parsed.error),
     );
   }
-  const frontmatter = parsed.data;
+  return { frontmatter: parsed.data, content };
+}
+
+async function renderOne(
+  assets: TemplateAssets,
+  srcPath: string,
+  outDir: string,
+): Promise<{ outNames: string[]; hasMermaid: boolean }> {
+  let raw: string;
+  try {
+    raw = await readFile(srcPath, "utf8");
+  } catch (err) {
+    throw new BuildError(
+      "source-read",
+      `could not read ${srcPath}: ${reason(err)}`,
+    );
+  }
+
+  const { frontmatter, content } = parseDocument(raw, srcPath);
   const base = path.basename(srcPath, ".md");
   const logo = await resolveLogo(frontmatter.logo, srcPath);
 
@@ -292,6 +318,34 @@ async function loadTemplateAssets(
   ].join("\n");
 
   return { template, cssInput, mermaidScript };
+}
+
+/**
+ * Renders a Markdown source string to a self-contained HTML string using the
+ * given template/theme, without writing anything to disk. `srcPath` is the
+ * notional path of the source: it names the document in pipeline diagnostics,
+ * seeds the output title's fallback, and anchors relative frontmatter paths
+ * (e.g. `logo`). Throws a BuildError for an unknown template/theme, invalid
+ * frontmatter, or a render failure.
+ */
+export async function renderToHtml(
+  raw: string,
+  srcPath: string,
+  options: BuildOptions,
+): Promise<{ html: string; hasMermaid: boolean }> {
+  const assets = await loadTemplateAssets(options);
+  const { frontmatter, content } = parseDocument(raw, srcPath);
+  const base = path.basename(srcPath, ".md");
+  const logo = await resolveLogo(frontmatter.logo, srcPath);
+  const { page, hasMermaid } = await assemblePage(
+    assets,
+    frontmatter,
+    logo,
+    content,
+    srcPath,
+    base,
+  );
+  return { html: page, hasMermaid };
 }
 
 export interface BuildResult {
