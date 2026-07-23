@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.0.4](https://github.com/draekien/mashay/compare/v0.0.3...v0.0.4) (2026-07-23)
+
+
+### Features
+
+* add five themes and decouple theme naming from templates ([#3](https://github.com/draekien/mashay/issues/3)) ([f369483](https://github.com/draekien/mashay/commit/f36948384bd77807c0c769bc499b3647b98535a0))
+* add preview command to render a template/theme in the browser ([#1](https://github.com/draekien/mashay/issues/1)) ([c330f09](https://github.com/draekien/mashay/commit/c330f09548a8297b5e88f36b1475b2fed96ac03d))
+* make preview command interactive for template/theme selection ([#2](https://github.com/draekien/mashay/issues/2)) ([8c20ffc](https://github.com/draekien/mashay/commit/8c20ffcb94e31ef7b319802816eca6cc9353ca49))
+
 ## [0.0.3](https://github.com/draekien/mashay/compare/v0.0.2...v0.0.3) (2026-07-21)
 
 
