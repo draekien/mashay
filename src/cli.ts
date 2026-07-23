@@ -19,10 +19,12 @@ import open from "open";
 import {
   type BuildSummary,
   buildDocuments,
+  DEFAULT_TEMPLATE,
   DEFAULT_THEME,
   listTemplates,
-  listThemes,
+  listThemeSwatches,
   renderToHtml,
+  type ThemeSwatch,
 } from "./lib/build.js";
 import {
   aggregateExitCode,
@@ -48,7 +50,7 @@ const { version } = JSON.parse(
 
 interface BuildFlags {
   out: string;
-  template: string;
+  template?: string;
   theme?: string;
 }
 
@@ -73,17 +75,21 @@ program
     "markdown file or directory to build (omit to pick files interactively)",
   )
   .option("--out <dir>", "output directory", "out")
-  .option("--template <name>", "template to render with", "academic")
+  .option("--template <name>", "template to render with (defaults to academic)")
   .option("--theme <name>", "theme to style with (defaults to harbor)")
   // `mashay process <src>` builds directly; `mashay process` (no src) drops into
   // interactive file-picking.
   .action(async (src: string | undefined, opts: BuildFlags) => {
-    const theme = opts.theme ?? DEFAULT_THEME;
     try {
       if (src) {
-        await runDirect(src, opts.out, opts.template, theme);
+        await runDirect(
+          src,
+          opts.out,
+          opts.template ?? DEFAULT_TEMPLATE,
+          opts.theme ?? DEFAULT_THEME,
+        );
       } else {
-        await runInteractive(opts.out, opts.template, theme);
+        await runInteractive(opts.out, opts.template, opts.theme);
       }
     } catch (err) {
       reportError(err);
@@ -118,8 +124,8 @@ async function runDirect(
 
 async function runInteractive(
   out: string,
-  template: string,
-  theme: string,
+  template: string | undefined,
+  theme: string | undefined,
 ): Promise<void> {
   intro(chalk.bold("mashay"));
 
@@ -149,6 +155,30 @@ async function runInteractive(
     return;
   }
 
+  let selectedTemplate = template;
+  if (!selectedTemplate) {
+    const choice = await pickName(
+      "template",
+      await listTemplates(),
+      DEFAULT_TEMPLATE,
+    );
+    if (isCancel(choice)) {
+      cancel("Cancelled");
+      return;
+    }
+    selectedTemplate = choice;
+  }
+
+  let selectedTheme = theme;
+  if (!selectedTheme) {
+    const choice = await pickTheme(await listThemeSwatches(), DEFAULT_THEME);
+    if (isCancel(choice)) {
+      cancel("Cancelled");
+      return;
+    }
+    selectedTheme = choice;
+  }
+
   const outDirAnswer = await text({
     message: "Output directory",
     initialValue: out,
@@ -164,8 +194,8 @@ async function runInteractive(
   const s = spinner();
   s.start("Building documents");
   const summary = await buildDocuments(selected as string[], outDir, {
-    template,
-    theme,
+    template: selectedTemplate,
+    theme: selectedTheme,
   });
   s.stop("Build complete");
 
@@ -380,6 +410,30 @@ async function pickName(
   });
 }
 
+function themeSwatch(colors: string[]): string {
+  return colors.map((color) => chalk.hex(color)("■")).join(" ");
+}
+
+async function pickTheme(
+  themes: ThemeSwatch[],
+  preferred: string,
+): Promise<string | symbol> {
+  if (themes.length === 0) {
+    return preferred;
+  }
+  const width = Math.max(...themes.map((theme) => theme.name.length));
+  return select({
+    message: "Select a theme",
+    options: themes.map((theme) => ({
+      value: theme.name,
+      label: `${theme.name.padEnd(width)}  ${themeSwatch(theme.colors)}`,
+    })),
+    initialValue: themes.some((theme) => theme.name === preferred)
+      ? preferred
+      : themes[0].name,
+  });
+}
+
 async function resolvePreviewSelection(opts: {
   template?: string;
   theme?: string;
@@ -402,7 +456,7 @@ async function resolvePreviewSelection(opts: {
 
   let theme = opts.theme;
   if (!theme) {
-    const choice = await pickName("theme", await listThemes(), DEFAULT_THEME);
+    const choice = await pickTheme(await listThemeSwatches(), DEFAULT_THEME);
     if (isCancel(choice)) {
       cancel("Cancelled");
       return undefined;

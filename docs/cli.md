@@ -17,8 +17,9 @@ npx @draekien/mashay process ./docs --out ./html
 ```
 
 With no source path, mashay recursively scans the current directory for `.md`
-files, groups them by folder, and lets you multi-select which ones to build and
-set the output directory:
+files, groups them by folder, and lets you multi-select which ones to build. It
+then prompts for the template and theme — the theme picker shows a colour
+preview of each — and the output directory:
 
 ```bash
 npx @draekien/mashay process
