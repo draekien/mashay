@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{title}}</title>
+  <meta name="description" content="{{description}}" />
+  <style>
+{{styles}}
+  </style>
+</head>
+<body>
+  <div class="doc-shell">
+    <aside class="doc-nav">
+      <div class="doc-nav-inner">
+        <div class="doc-brand">
+          <span class="doc-logo">{{logo}}</span>
+          <span class="doc-brand-title">{{title}}</span>
+        </div>
+        {{toc}}
+      </div>
+    </aside>
+
+    <main class="doc">
+      <header class="doc-header">
+        <div class="doc-eyebrow">{{eyebrow}}</div>
+        <h1 class="doc-title">{{title}}</h1>
+        <p class="doc-subtitle">{{description}}</p>
+        {{metaGrid}}
+      </header>
+      {{changelog}}
+      <article class="doc-content prose max-w-none">
+        {{content}}
+      </article>
+      <footer class="doc-footer">
+        <p>Built with <a href="https://github.com/draekien/mashay">mashay</a></p>
+      </footer>
+    </main>
+  </div>
+
+  <div id="mermaid-lightbox" class="lightbox-overlay">
+    <button type="button" class="lightbox-close" aria-label="Close">&times;</button>
+    <div class="lightbox-content"></div>
+  </div>
+
+  {{mermaid}}
+  <script>
+    document.addEventListener("click", function (e) {
+      var wrapper = e.target.closest(".mermaid-wrapper");
+      var overlay = document.getElementById("mermaid-lightbox");
+      if (wrapper) {
+        var svg = wrapper.querySelector("svg");
+        if (svg) {
+          var clone = svg.cloneNode(true);
+          clone.removeAttribute("width");
+          clone.removeAttribute("height");
+          clone.removeAttribute("style");
+          clone.style.width = "100%";
+          clone.style.height = "auto";
+          var content = overlay.querySelector(".lightbox-content");
+          content.innerHTML = "";
+          content.appendChild(clone);
+          overlay.classList.add("open");
+        }
+        return;
+      }
+      if (e.target.closest(".lightbox-close") || e.target === overlay) {
+        overlay.classList.remove("open");
+      }
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") {
+        document.getElementById("mermaid-lightbox").classList.remove("open");
+      }
+    });
+  </script>
+</body>
+</html>

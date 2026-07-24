@@ -4,7 +4,8 @@
 
 ```
 templates/
-  academic/    template.html (Tailwind chrome) + template.css (components, non-colour tokens, prose)
+  academic/    template.html (chrome) + template.css (components, non-colour tokens, prose); default
+  swiss/ handbook/ editorial/ blueprint/ journal/   additional layouts, same colour-token contract
 themes/
   harbor/      theme.css — colour tokens only (standardized --color-* set); default
   slate/ oxblood/ forest/ plum/ sepia/   additional colour palettes

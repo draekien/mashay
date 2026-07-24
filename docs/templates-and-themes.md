@@ -13,14 +13,29 @@ mashay separates *layout* from *styling*:
   shared, any theme pairs with any template.
 
 Select them with `--template <name>` (default `academic`) and `--theme <name>`
-(default `harbor`). One template ships — `academic` — alongside six themes:
-`harbor` (the default), `slate`, `oxblood`, `forest`, `plum`, and `sepia`.
-Template and theme are chosen independently, so any theme pairs with any
-template:
+(default `harbor`). Six templates ship, each a different document world built on
+the same colour-token contract:
+
+- **`academic`** (the default) — a calm executive brief: navy masthead, a sticky
+  navigation rail, teal numbered heading chips, serif body.
+- **`swiss`** — International Typographic Style: a system grotesque, thick
+  section rules, and the section numbers hung large in a left gutter.
+- **`handbook`** — a screen-documentation interface: a sticky left nav rail
+  carrying the table of contents beside a comfortable reading column.
+- **`editorial`** — a literary long-read: a centred serif display nameplate, a
+  drop cap, rule-underlined section labels, and blockquotes set as pull-quotes.
+- **`blueprint`** — engineering drafting: a grid-paper ground, monospace chrome,
+  and a bordered corner title block.
+- **`journal`** — a scientific preprint: a centred title/author block, an
+  Abstract box, a classical Contents list, and justified serif body.
+
+They pair with six themes: `harbor` (the default), `slate`, `oxblood`, `forest`,
+`plum`, and `sepia`. Template and theme are chosen independently, so any theme
+pairs with any template:
 
 ```bash
 mashay process ./my-doc.md --theme sepia
-mashay process ./my-doc.md --template academic --theme slate
+mashay process ./my-doc.md --template blueprint --theme slate
 ```
 
 Unknown template or theme names error with the list of available names. The

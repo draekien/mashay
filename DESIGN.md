@@ -87,12 +87,42 @@ mashay renders — not just the one that ships today. It has two levels:
   (self-containment, the numbered spine, accessibility, token-only styling) that
   any template or theme must honour to belong to mashay.
 - **A template + theme** — one committed aesthetic built on that contract, each
-  bringing its own Creative North Star. One template ships (**academic**) with
-  six themes (**harbor** is the default, then **slate**, **oxblood**,
-  **forest**, **plum**, **sepia**); sections 2–6 document the **academic +
-  harbor** reference pairing. harbor's concrete colour tokens populate this
-  file's frontmatter, and every other theme reskins the same template by
-  overriding that `--color-*` set.
+  bringing its own Creative North Star. Six templates ship (**academic**,
+  **swiss**, **handbook**, **editorial**, **blueprint**, **journal**) with six
+  themes (**harbor** is the default, then **slate**, **oxblood**, **forest**,
+  **plum**, **sepia**); sections 2–6 document the **academic + harbor**
+  reference pairing in full. harbor's concrete colour tokens populate this
+  file's frontmatter, and every other theme reskins any template by overriding
+  that `--color-*` set. Each template is written against the same standardized
+  `--color-*` contract and styles the same generated component set, so any
+  template pairs with any theme; what a template owns is **layout, chrome, type
+  ramp, and how it renders the numbered spine**. The type-scale and component
+  values in sections 3–5 below are academic's own ramp — each other template
+  carries its own non-colour ramp in its `template.css`, which is expected and
+  legitimate, not a drift from this file.
+
+### The other five templates (North Stars)
+
+Each is a different document world the audience knows by heart, honouring every
+system invariant (self-containment, system fonts only, token-only colour, the
+numbered spine, the AA floor):
+
+- **swiss** — *International Typographic Style.* A single system-grotesque
+  voice, thick horizontal section rules, and the section numbers hung large in a
+  left gutter as the primary design element.
+- **handbook** — *the screen-documentation interface.* A full-height sticky left
+  nav rail carrying the table of contents beside a comfortable reading column;
+  muted inline numbering, left-accent alerts, header-barred code.
+- **editorial** — *the literary long-read.* A centred serif display nameplate,
+  an italic deck, a drop cap opening the piece, rule-underlined sans section
+  labels, and blockquotes set as pull-quotes.
+- **blueprint** — *engineering drafting.* A token-coloured grid-paper ground,
+  monospace chrome, a bordered corner title block, and a navy code panel; the
+  grid gradient is a native device of technical drawing, not decoration (so the
+  academic "no gradients" rule is academic's, not a system invariant).
+- **journal** — *the scientific preprint.* A centred title/author block, an
+  Abstract box built from the description, a classical Contents list, justified
+  serif body, and small-caps decimal numbering.
 
 ### The two-layer architecture
 
