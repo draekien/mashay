@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.0.5](https://github.com/draekien/mashay/compare/v0.0.4...v0.0.5) (2026-07-24)
+
+
+### Features
+
+* add five templates (swiss, handbook, editorial, blueprint, journal) ([#4](https://github.com/draekien/mashay/issues/4)) ([06a3fc0](https://github.com/draekien/mashay/commit/06a3fc0dbcf4fcfea0061e32483e1554a77fa20f))
+
 ## [0.0.4](https://github.com/draekien/mashay/compare/v0.0.3...v0.0.4) (2026-07-23)
 
 
