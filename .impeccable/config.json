@@ -1,0 +1,32 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font-size",
+        "value": "*",
+        "files": [
+          "templates/blueprint/template.css",
+          "templates/editorial/template.css",
+          "templates/handbook/template.css",
+          "templates/journal/template.css",
+          "templates/swiss/template.css"
+        ],
+        "createdAt": "2026-07-24T06:05:06.553Z"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "templates/blueprint/template.css",
+          "templates/editorial/template.css",
+          "templates/handbook/template.css",
+          "templates/journal/template.css",
+          "templates/swiss/template.css"
+        ],
+        "createdAt": "2026-07-24T06:05:06.639Z"
+      }
+    ]
+  }
+}
