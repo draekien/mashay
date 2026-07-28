@@ -152,15 +152,16 @@ body {
   padding-bottom: var(--spacing-extra-large);
 }
 
-/* Table of contents — a slim centred "Contents" strip, inline above the piece. */
+/* Table of contents — a left-aligned, collapsible "Contents" panel above the
+ * piece. The label becomes a disclosure toggle when the template script runs;
+ * with no script the full list stays visible (progressive enhancement). */
 .toc {
-  text-align: center;
   font-family: var(--font-sans);
   margin: var(--spacing-large) 0;
 }
 
 .toc-appendix {
-  margin-top: 0;
+  margin-top: var(--spacing-medium);
 }
 
 .toc .toc-label {
@@ -169,32 +170,87 @@ body {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-neutral-600);
-  margin: 0 0 var(--spacing-extra-small);
+  margin: 0 0 var(--spacing-small);
+}
+
+.toc-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-extra-small);
+  width: 100%;
+  padding: var(--spacing-extra-small) 0;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--color-neutral-300);
+  color: var(--color-neutral-600);
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: left;
+  cursor: pointer;
+  transition: color var(--transition-fast) ease-in-out;
+}
+
+.toc-toggle:hover {
+  color: var(--color-primary-600);
+}
+
+.toc-toggle:focus-visible {
+  outline: 2px solid var(--color-primary-600);
+  outline-offset: 2px;
+}
+
+.toc-toggle::after {
+  content: "";
+  flex-shrink: 0;
+  margin-left: auto;
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-25%) rotate(45deg);
+  transition: transform var(--transition-fast) ease-in-out;
+}
+
+.toc-collapsible.toc-open .toc-toggle::after {
+  transform: translateY(25%) rotate(225deg);
 }
 
 .toc ul {
   list-style: none;
   margin: 0;
   padding-left: 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--spacing-extra-small) var(--spacing-medium);
-}
-
-.toc ul ul {
-  width: 100%;
-  gap: var(--spacing-medium);
 }
 
 .toc li {
-  margin: 0;
+  margin: 0 0 var(--spacing-extra-small);
+}
+
+.toc ul ul {
+  padding-left: var(--spacing-medium);
+  margin: var(--spacing-extra-extra-small) 0 var(--spacing-small);
+}
+
+.toc-collapsible ul {
+  display: none;
+}
+
+.toc-collapsible.toc-open ul {
+  display: block;
+}
+
+.toc-collapsible.toc-open > ul {
+  margin-top: var(--spacing-small);
 }
 
 .toc a {
+  display: inline-block;
   color: var(--color-neutral-700);
   text-decoration: none;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
   transition: color var(--transition-fast) ease-in-out;
 }
 
@@ -205,7 +261,7 @@ body {
 .toc-number {
   color: var(--color-primary-600);
   font-variant-numeric: tabular-nums;
-  margin-right: 0.15rem;
+  margin-right: 0.35rem;
 }
 
 .doc-content {
@@ -728,6 +784,8 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .toc a,
+  .toc-toggle,
+  .toc-toggle::after,
   .changelog summary,
   .changelog summary::after,
   .appendix-entry summary,
