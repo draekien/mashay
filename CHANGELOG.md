@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.0.6](https://github.com/draekien/mashay/compare/v0.0.5...v0.0.6) (2026-07-28)
+
+
+### Bug Fixes
+
+* make editorial TOC left-aligned and collapsible so it scales with many headings ([#5](https://github.com/draekien/mashay/issues/5)) ([ce6f5fa](https://github.com/draekien/mashay/commit/ce6f5faa2f2d81045e8d74e92ce6a6da15eff2cd))
+
 ## [0.0.5](https://github.com/draekien/mashay/compare/v0.0.4...v0.0.5) (2026-07-24)
 
 
