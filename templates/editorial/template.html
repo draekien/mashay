@@ -67,6 +67,22 @@
         document.getElementById("mermaid-lightbox").classList.remove("open");
       }
     });
+    document.querySelectorAll("nav.toc").forEach(function (toc) {
+      var label = toc.querySelector(".toc-label");
+      var list = toc.querySelector("ul");
+      if (!label || !list) return;
+      toc.classList.add("toc-collapsible");
+      var toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "toc-toggle";
+      toggle.textContent = label.textContent;
+      toggle.setAttribute("aria-expanded", "false");
+      label.replaceWith(toggle);
+      toggle.addEventListener("click", function () {
+        var open = toc.classList.toggle("toc-open");
+        toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+    });
   </script>
 </body>
 </html>
