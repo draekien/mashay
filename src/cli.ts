@@ -21,6 +21,7 @@ import {
   buildDocuments,
   DEFAULT_TEMPLATE,
   DEFAULT_THEME,
+  ejectAssets,
   listTemplates,
   listThemeSwatches,
   renderToHtml,
@@ -75,8 +76,14 @@ program
     "markdown file or directory to build (omit to pick files interactively)",
   )
   .option("--out <dir>", "output directory", "out")
-  .option("--template <name>", "template to render with (defaults to academic)")
-  .option("--theme <name>", "theme to style with (defaults to harbor)")
+  .option(
+    "--template <name|dir>",
+    "template to render with — a bundled name, or a directory holding template.html (defaults to academic)",
+  )
+  .option(
+    "--theme <name|dir>",
+    "theme to style with — a bundled name, or a directory holding theme.css (defaults to harbor)",
+  )
   // `mashay process <src>` builds directly; `mashay process` (no src) drops into
   // interactive file-picking.
   .action(async (src: string | undefined, opts: BuildFlags) => {
@@ -472,8 +479,14 @@ program
   .description(
     "Preview a template/theme combination in the browser with a built-in sample",
   )
-  .option("--template <name>", "template to render with")
-  .option("--theme <name>", "theme to style with (defaults to harbor)")
+  .option(
+    "--template <name|dir>",
+    "template to render with — a bundled name, or a directory holding template.html",
+  )
+  .option(
+    "--theme <name|dir>",
+    "theme to style with — a bundled name, or a directory holding theme.css (defaults to harbor)",
+  )
   .action(async (opts: { template?: string; theme?: string }) => {
     try {
       const selection = await resolvePreviewSelection(opts);
@@ -484,6 +497,48 @@ program
         selection,
       );
       await servePreview(html);
+    } catch (err) {
+      reportError(err);
+    }
+  });
+
+// An ejected directory is passed straight back to --template/--theme, which
+// only read a value as a path when it carries a separator — so a bare "brand"
+// is echoed back as "./brand".
+function pathRef(dir: string): string {
+  if (path.isAbsolute(dir)) return dir;
+  const normalized = dir.split(/[\\/]/).join("/");
+  return normalized.startsWith(".") ? normalized : `./${normalized}`;
+}
+
+program
+  .command("eject")
+  .description(
+    "Copy a bundled template and theme into a directory as a starting point for a custom one",
+  )
+  .argument(
+    "<dir>",
+    "directory to copy template.html/template.css/theme.css into",
+  )
+  .option("--template <name>", "template to copy (defaults to academic)")
+  .option("--theme <name>", "theme to copy (defaults to harbor)")
+  .action(async (dir: string, opts: { template?: string; theme?: string }) => {
+    try {
+      const written = await ejectAssets({
+        dir,
+        template: opts.template ?? DEFAULT_TEMPLATE,
+        theme: opts.theme ?? DEFAULT_THEME,
+      });
+      for (const file of written) {
+        console.log(chalk.green("ejected"), path.relative(process.cwd(), file));
+      }
+      const ref = pathRef(dir);
+      console.log();
+      console.log(
+        chalk.dim(
+          `Build with it:  mashay process <src> --template ${ref} --theme ${ref}`,
+        ),
+      );
     } catch (err) {
       reportError(err);
     }

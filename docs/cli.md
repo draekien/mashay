@@ -3,7 +3,7 @@
 Run it from anywhere without installing anything permanently:
 
 ```bash
-npx @draekien/mashay process [src] [--out <dir>] [--template <name>] [--theme <name>]
+npx @draekien/mashay process [src] [--out <dir>] [--template <name|dir>] [--theme <name|dir>]
 ```
 
 Conversion is the `process` subcommand. `[src]` is a single `.md` file or a
@@ -56,6 +56,22 @@ npx @draekien/mashay preview --template academic  # pick only the theme
 npx @draekien/mashay preview --template academic --theme harbor  # no prompts
 ```
 
+`mashay eject <dir> [--template <name>] [--theme <name>]` copies a bundled
+template and theme into `<dir>` — `template.html`, `template.css`, and
+`theme.css` side by side — as a starting point for a custom one. Defaults are
+`academic` and `harbor`. Because `--template` and `--theme` both accept a
+directory, that one directory serves as both:
+
+```bash
+npx @draekien/mashay eject ./brand --template swiss --theme oxblood
+npx @draekien/mashay process ./my-doc.md --template ./brand --theme ./brand
+```
+
+Eject never overwrites: if `<dir>` already holds any of the three files, nothing
+is written and it exits `14`. See
+[Templates and themes](./templates-and-themes.md#custom-templates-and-themes)
+for what you can change once ejected.
+
 `mashay docs [topic]` prints the Markdown formatting rules documented in
 [Markdown conventions](./markdown.md) (frontmatter, headings, alerts, code
 blocks, mermaid, appendix, Obsidian syntax) — omit `[topic]` for an interactive
@@ -84,6 +100,6 @@ pnpm add -D @draekien/mashay
 Then invoke it directly:
 
 ```bash
-mashay process [src] [--out <dir>] [--template <name>] [--theme <name>]
+mashay process [src] [--out <dir>] [--template <name|dir>] [--theme <name|dir>]
 mashay process
 ```

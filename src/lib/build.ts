@@ -1,4 +1,11 @@
-import { access, mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import {
+  access,
+  copyFile,
+  mkdir,
+  readdir,
+  readFile,
+  writeFile,
+} from "node:fs/promises";
 import path from "node:path";
 import { compile } from "@tailwindcss/node";
 import { Scanner } from "@tailwindcss/oxide";
@@ -300,32 +307,53 @@ export async function listThemeSwatches(): Promise<ThemeSwatch[]> {
   );
 }
 
+function exists(file: string): Promise<boolean> {
+  return access(file).then(
+    () => true,
+    () => false,
+  );
+}
+
+// A --template/--theme value carrying a path separator ("./brand", "../shared",
+// "C:\\brand") names a directory on disk; anything else names a bundled asset.
+function isPathLike(value: string): boolean {
+  return /[\\/]/.test(value);
+}
+
+async function resolveCustomAsset(
+  dir: string,
+  filename: string,
+  kind: BuildErrorKind,
+): Promise<string> {
+  const file = path.resolve(dir, filename);
+  if (await exists(file)) return file;
+  throw new BuildError(kind, `no ${filename} in "${path.resolve(dir)}"`);
+}
+
 async function resolveTemplateFile(name: string): Promise<string> {
-  const file = path.join(TEMPLATES_DIR, name, "template.html");
-  try {
-    await access(file);
-    return file;
-  } catch {
-    const available = await listNames(TEMPLATES_DIR);
-    throw new BuildError(
-      "unknown-template",
-      `unknown template "${name}" — available templates: ${available.join(", ") || "(none)"}`,
-    );
+  if (isPathLike(name)) {
+    return resolveCustomAsset(name, "template.html", "unknown-template");
   }
+  const file = path.join(TEMPLATES_DIR, name, "template.html");
+  if (await exists(file)) return file;
+  const available = await listNames(TEMPLATES_DIR);
+  throw new BuildError(
+    "unknown-template",
+    `unknown template "${name}" — available templates: ${available.join(", ") || "(none)"}`,
+  );
 }
 
 async function resolveThemeFile(name: string): Promise<string> {
-  const file = path.join(THEMES_DIR, name, "theme.css");
-  try {
-    await access(file);
-    return file;
-  } catch {
-    const available = await listNames(THEMES_DIR);
-    throw new BuildError(
-      "unknown-theme",
-      `unknown theme "${name}" — available themes: ${available.join(", ") || "(none)"}`,
-    );
+  if (isPathLike(name)) {
+    return resolveCustomAsset(name, "theme.css", "unknown-theme");
   }
+  const file = path.join(THEMES_DIR, name, "theme.css");
+  if (await exists(file)) return file;
+  const available = await listNames(THEMES_DIR);
+  throw new BuildError(
+    "unknown-theme",
+    `unknown theme "${name}" — available themes: ${available.join(", ") || "(none)"}`,
+  );
 }
 
 // Assembles the Tailwind v4 input: the framework and typography plugin, then
@@ -471,4 +499,57 @@ export async function buildDocuments(
     }
   }
   return { results, failures };
+}
+
+/** Where to copy a template/theme pair, and which pair to copy. */
+export interface EjectOptions {
+  template: string;
+  theme: string;
+  dir: string;
+}
+
+/**
+ * Copies a template and theme into `dir` as an editable starting point, laid
+ * out so the directory serves as both a `--template` and a `--theme` value.
+ * Returns the absolute paths written, template first. Refuses to overwrite: if
+ * `dir` already holds any of the files, nothing is written and an
+ * eject-conflict BuildError is thrown.
+ */
+export async function ejectAssets(options: EjectOptions): Promise<string[]> {
+  const templateFile = await resolveTemplateFile(options.template);
+  const themeFile = await resolveThemeFile(options.theme);
+  const templateCssFile = path.join(path.dirname(templateFile), "template.css");
+
+  const sources = [templateFile];
+  if (await exists(templateCssFile)) sources.push(templateCssFile);
+  sources.push(themeFile);
+
+  const dir = path.resolve(options.dir);
+  const copies = sources.map((from) => ({
+    from,
+    to: path.join(dir, path.basename(from)),
+  }));
+
+  const present = await Promise.all(copies.map((copy) => exists(copy.to)));
+  const clashes = copies
+    .filter((_, index) => present[index])
+    .map((copy) => path.basename(copy.to));
+  if (clashes.length > 0) {
+    throw new BuildError(
+      "eject-conflict",
+      `${dir} already contains ${clashes.join(", ")} — eject into an empty directory, or remove those files first`,
+    );
+  }
+
+  try {
+    await mkdir(dir, { recursive: true });
+  } catch (err) {
+    throw new BuildError(
+      "output-dir",
+      `could not create directory ${dir}: ${reason(err)}`,
+    );
+  }
+
+  await Promise.all(copies.map((copy) => copyFile(copy.from, copy.to)));
+  return copies.map((copy) => copy.to);
 }

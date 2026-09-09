@@ -186,3 +186,95 @@ describe("per-file error isolation and exit codes", () => {
     expect(stdout).toContain("mixed");
   });
 });
+
+describe("eject and custom template/theme directories", () => {
+  let ejectDir: string;
+
+  beforeEach(async () => {
+    ejectDir = path.join(
+      await mkdtemp(path.join(tmpdir(), "mashay-eject-test-")),
+      "brand",
+    );
+  });
+
+  afterEach(async () => {
+    await rm(path.dirname(ejectDir), { recursive: true, force: true });
+  });
+
+  it("ejects a template and theme into one directory", async () => {
+    const { code, stdout } = await runCli([
+      "eject",
+      ejectDir,
+      "--template",
+      "swiss",
+      "--theme",
+      "oxblood",
+    ]);
+
+    expect(code).toBe(0);
+    expect(await fileExists(path.join(ejectDir, "template.html"))).toBe(true);
+    expect(await fileExists(path.join(ejectDir, "template.css"))).toBe(true);
+    expect(await fileExists(path.join(ejectDir, "theme.css"))).toBe(true);
+    expect(stdout).toContain("--template");
+  });
+
+  it("renders from an ejected directory exactly as from the bundled pair", async () => {
+    await runCli([
+      "eject",
+      ejectDir,
+      "--template",
+      "swiss",
+      "--theme",
+      "oxblood",
+    ]);
+
+    const { code } = await runCli([
+      "process",
+      FIXTURE,
+      "--out",
+      outDir,
+      "--template",
+      ejectDir,
+      "--theme",
+      ejectDir,
+    ]);
+    await runCli([
+      "process",
+      FIXTURE,
+      "--out",
+      path.join(outDir, "builtin"),
+      "--template",
+      "swiss",
+      "--theme",
+      "oxblood",
+    ]);
+
+    expect(code).toBe(0);
+    expect(await readFile(path.join(outDir, "example.html"), "utf8")).toBe(
+      await readFile(path.join(outDir, "builtin", "example.html"), "utf8"),
+    );
+  });
+
+  it("exits 14 rather than overwriting an already-ejected directory", async () => {
+    await runCli(["eject", ejectDir]);
+
+    const { code, stderr } = await runCli(["eject", ejectDir]);
+
+    expect(stderr).toContain("already contains template.html");
+    expect(code).toBe(14);
+  });
+
+  it("exits 10 for a directory holding no template.html", async () => {
+    const { code, stderr } = await runCli([
+      "process",
+      FIXTURE,
+      "--out",
+      outDir,
+      "--template",
+      "./no-such-dir",
+    ]);
+
+    expect(stderr).toContain("no template.html in");
+    expect(code).toBe(10);
+  });
+});

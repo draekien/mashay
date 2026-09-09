@@ -12,10 +12,11 @@ always prints regardless.
 |---|---|
 | 0 | Success — every document built, no failures |
 | 1 | Unexpected or unclassified error |
-| 10 | Unknown `--template` name |
-| 11 | Unknown `--theme` name |
+| 10 | Unknown `--template` name, or a directory holding no `template.html` |
+| 11 | Unknown `--theme` name, or a directory holding no `theme.css` |
 | 12 | No input found (missing source path, or a directory with no `.md` files) |
 | 13 | Output directory could not be created |
+| 14 | `mashay eject` target already holds a file it would write |
 | 20 | A document's frontmatter is malformed |
 | 21 | A document's logo is missing or an unsupported format |
 | 22 | A source file could not be read |

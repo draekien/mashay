@@ -1,13 +1,15 @@
 /**
  * A classified build failure. The setup kinds (unknown-template, unknown-theme,
- * no-input, output-dir) abort the whole run; the document kinds (frontmatter,
- * logo, source-read, render) are isolated so a batch can continue past them.
+ * no-input, output-dir, eject-conflict) abort the whole run; the document kinds
+ * (frontmatter, logo, source-read, render) are isolated so a batch can continue
+ * past them.
  */
 export type BuildErrorKind =
   | "unknown-template"
   | "unknown-theme"
   | "no-input"
   | "output-dir"
+  | "eject-conflict"
   | "frontmatter"
   | "logo"
   | "source-read"
@@ -61,6 +63,12 @@ export const EXIT_CODE_TABLE: ExitCodeEntry[] = [
     code: 13,
     kind: "output-dir",
     description: "Output directory could not be created.",
+  },
+  {
+    code: 14,
+    kind: "eject-conflict",
+    description:
+      "Eject target directory already holds a file eject would write.",
   },
   {
     code: 20,

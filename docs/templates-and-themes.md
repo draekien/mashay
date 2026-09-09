@@ -41,6 +41,47 @@ mashay process ./my-doc.md --template blueprint --theme slate
 Unknown template or theme names error with the list of available names. The
 architecture is built so more templates and themes can be added later.
 
+## Custom templates and themes
+
+`--template` and `--theme` also take a **directory path** — any value carrying a
+path separator (`./brand`, `../shared/house-style`, an absolute path) is read as
+a directory on disk rather than a bundled name. mashay looks for
+`template.html`/`template.css` in the `--template` directory and `theme.css` in
+the `--theme` directory, so one directory can serve as both.
+
+Start from a bundled pair rather than a blank file:
+
+```bash
+mashay eject ./brand --template swiss --theme oxblood
+# ejected brand/template.html
+# ejected brand/template.css
+# ejected brand/theme.css
+
+mashay process ./my-doc.md --template ./brand --theme ./brand
+```
+
+A bare directory name is *not* read as a path — `--template brand` looks for a
+bundled template called `brand` and errors. Write `./brand`.
+
+Two constraints apply to an ejected copy:
+
+- **Relative `@import`s in `template.css`/`theme.css` don't resolve.** The CSS is
+  compiled with mashay's own package as the Tailwind base directory, so
+  `@import "tailwindcss"` resolves out of mashay's dependencies and
+  `@import "./tokens.css"` does not. Keep each file self-contained.
+- **A custom theme must define the whole `--color-*` set.** Templates are written
+  against the standardized token contract; a token the theme omits resolves to
+  nothing wherever the template uses it. Editing the values in an ejected
+  `theme.css` is safe — deleting declarations is not.
+
+The `template.html` skeleton is filled by substituting `{{title}}`,
+`{{description}}`, `{{eyebrow}}`, `{{logo}}`, `{{metaGrid}}`, `{{changelog}}`,
+`{{toc}}`, `{{content}}`, `{{styles}}`, and `{{mermaid}}`. Chrome is authored
+with Tailwind utilities referencing `var(--color-*)`, and the generated
+component classes (`.heading-number`, `.toc`, `.alert-*`, `.code-block`,
+`.appendix-entry`, `.changelog`, `.mermaid-wrapper`, `.doc-info-*`) are
+available to any template.
+
 At build time, Tailwind v4 and `@tailwindcss/typography` compile only the CSS
 the page actually uses, and it's inlined into a single `<style>` block — so the
 output is one self-contained `.html` file. The only exception: a document
