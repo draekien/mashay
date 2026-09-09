@@ -186,3 +186,205 @@ describe("per-file error isolation and exit codes", () => {
     expect(stdout).toContain("mixed");
   });
 });
+
+describe("lint", () => {
+  let srcDir: string;
+
+  beforeEach(async () => {
+    srcDir = await mkdtemp(path.join(tmpdir(), "mashay-lint-test-"));
+  });
+
+  afterEach(async () => {
+    await rm(srcDir, { recursive: true, force: true });
+  });
+
+  it("passes the example fixtures and writes nothing", async () => {
+    const { code, stdout } = await runCli([
+      "lint",
+      path.join(ROOT, "examples"),
+    ]);
+
+    expect(code).toBe(0);
+    expect(stdout).toContain("2 checked, 0 failed");
+    expect(await fileExists(path.join(outDir, "example.html"))).toBe(false);
+  });
+
+  it("reports a malformed document and exits with its build code", async () => {
+    await writeFile(path.join(srcDir, "good.md"), "## Ok\n\nFine.\n");
+    await writeFile(
+      path.join(srcDir, "bad.md"),
+      "---\ntitle: 123\n---\n\n## Nope\n",
+    );
+
+    const { code, stdout, stderr } = await runCli(["lint", srcDir]);
+
+    expect(stdout).toContain("good.md");
+    expect(stderr).toContain("invalid frontmatter");
+    expect(stdout).toContain("2 checked, 1 failed");
+    expect(code).toBe(20);
+  });
+
+  it("reports a logo that does not resolve", async () => {
+    await writeFile(
+      path.join(srcDir, "logo.md"),
+      "---\nlogo: nope.svg\n---\n\n## Doc\n",
+    );
+
+    const { code, stderr } = await runCli(["lint", srcDir]);
+
+    expect(stderr).toContain("nope.svg");
+    expect(code).toBe(21);
+  });
+
+  it("exits 12 when the source path has no markdown", async () => {
+    const { code } = await runCli(["lint", srcDir]);
+    expect(code).toBe(12);
+  });
+
+  it("validates the template it is given", async () => {
+    await writeFile(path.join(srcDir, "good.md"), "## Ok\n\nFine.\n");
+
+    const { code, stderr } = await runCli([
+      "lint",
+      srcDir,
+      "--template",
+      "nope",
+    ]);
+
+    expect(stderr).toContain('unknown template "nope"');
+    expect(code).toBe(10);
+  });
+});
+
+describe("eject and custom template/theme directories", () => {
+  let ejectDir: string;
+
+  beforeEach(async () => {
+    ejectDir = path.join(
+      await mkdtemp(path.join(tmpdir(), "mashay-eject-test-")),
+      "brand",
+    );
+  });
+
+  afterEach(async () => {
+    await rm(path.dirname(ejectDir), { recursive: true, force: true });
+  });
+
+  it("ejects a template and theme into one directory", async () => {
+    const { code, stdout } = await runCli([
+      "eject",
+      ejectDir,
+      "--template",
+      "swiss",
+      "--theme",
+      "oxblood",
+    ]);
+
+    expect(code).toBe(0);
+    expect(await fileExists(path.join(ejectDir, "template.html"))).toBe(true);
+    expect(await fileExists(path.join(ejectDir, "template.css"))).toBe(true);
+    expect(await fileExists(path.join(ejectDir, "theme.css"))).toBe(true);
+    expect(stdout).toContain("--template");
+  });
+
+  it("renders from an ejected directory exactly as from the bundled pair", async () => {
+    await runCli([
+      "eject",
+      ejectDir,
+      "--template",
+      "swiss",
+      "--theme",
+      "oxblood",
+    ]);
+
+    const { code } = await runCli([
+      "process",
+      FIXTURE,
+      "--out",
+      outDir,
+      "--template",
+      ejectDir,
+      "--theme",
+      ejectDir,
+    ]);
+    await runCli([
+      "process",
+      FIXTURE,
+      "--out",
+      path.join(outDir, "builtin"),
+      "--template",
+      "swiss",
+      "--theme",
+      "oxblood",
+    ]);
+
+    expect(code).toBe(0);
+    expect(await readFile(path.join(outDir, "example.html"), "utf8")).toBe(
+      await readFile(path.join(outDir, "builtin", "example.html"), "utf8"),
+    );
+  });
+
+  it("exits 14 rather than overwriting an already-ejected directory", async () => {
+    await runCli(["eject", ejectDir]);
+
+    const { code, stderr } = await runCli(["eject", ejectDir]);
+
+    expect(stderr).toContain("already contains template.html");
+    expect(code).toBe(14);
+  });
+
+  it("exits 15 for a template missing a required placeholder", async () => {
+    await runCli(["eject", ejectDir]);
+    await writeFile(
+      path.join(ejectDir, "template.html"),
+      "<html><body>{{content}}</body></html>",
+    );
+
+    const { code, stderr } = await runCli([
+      "process",
+      FIXTURE,
+      "--out",
+      outDir,
+      "--template",
+      ejectDir,
+    ]);
+
+    expect(stderr).toContain("missing the {{styles}} placeholder");
+    expect(await fileExists(path.join(outDir, "example.html"))).toBe(false);
+    expect(code).toBe(15);
+  });
+
+  it("exits 16 for a theme omitting colour tokens the templates rely on", async () => {
+    await runCli(["eject", ejectDir]);
+    await writeFile(
+      path.join(ejectDir, "theme.css"),
+      ":root { --color-text: #101828; }",
+    );
+
+    const { code, stderr } = await runCli([
+      "process",
+      FIXTURE,
+      "--out",
+      outDir,
+      "--theme",
+      ejectDir,
+    ]);
+
+    expect(stderr).toContain("colour token");
+    expect(code).toBe(16);
+  });
+
+  it("exits 10 for a directory holding no template.html", async () => {
+    const { code, stderr } = await runCli([
+      "process",
+      FIXTURE,
+      "--out",
+      outDir,
+      "--template",
+      "./no-such-dir",
+    ]);
+
+    expect(stderr).toContain("no template.html in");
+    expect(code).toBe(10);
+  });
+});

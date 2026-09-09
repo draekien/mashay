@@ -24,6 +24,10 @@ Each `<file>.md` becomes `<file>.html` in the output directory. Do not assume a 
 
 **Template and theme.** A *template* is the HTML shell plus its non-colour styling. A *theme* is a set of colour values only. Any theme works with any template, and each has a default partner, so you can mix them freely. Choose them with the `process` template and theme flags. An unknown name fails with a list of the installed names. Read that list to see what is available.
 
+**Custom templates and themes.** Both flags also accept a directory holding the template or theme files, so a project can keep its own alongside the installed ones. A value only counts as a directory when it contains a path separator — write `./brand`, not `brand`. Do not hand-write one: `mashay eject` copies an installed template and theme out to a directory you name, ready to edit. Run `mashay eject --help` for its arguments.
+
+**Check before you build.** `mashay lint [src]` runs the same checks as a build — frontmatter, logo, rendering, and the template and theme themselves — without writing any output, and exits with the same codes. Use it after editing a Markdown file when you do not want the HTML yet, and to confirm a custom template works before building with it.
+
 **Batch builds.** One failed document does not stop the batch. The rest still build. Each failure prints to stderr, and the exit code tells you what kind of failure happened. Run `mashay docs exit-codes` for the full list of codes.
 
 ## Writing Markdown mashay can convert

@@ -16,6 +16,8 @@ npx @draekien/mashay process ./my-doc.md          # build one file
 npx @draekien/mashay process ./docs --out ./html  # build a directory
 npx @draekien/mashay process                      # pick files interactively
 npx @draekien/mashay preview                       # preview a template/theme in the browser
+npx @draekien/mashay lint ./docs                  # check without writing output
+npx @draekien/mashay eject ./brand                # copy a template/theme out to customise
 ```
 
 Conversion is the `process` subcommand; each `<file>.md` becomes `<file>.html`
@@ -28,9 +30,9 @@ explorer.
 
 ## Documentation
 
-- [CLI reference](./docs/cli.md) — commands, flags, interactive mode, installing
-- [Exit codes](./docs/exit-codes.md) — what each `process` exit code means
-- [Templates and themes](./docs/templates-and-themes.md) — layout vs. styling, `--template`/`--theme`, the bundled templates (`academic`, `swiss`, `handbook`, `editorial`, `blueprint`, `journal`) and themes (`harbor`, `slate`, `oxblood`, `forest`, `plum`, `sepia`)
+- [CLI reference](./docs/cli.md) — commands (`process`, `lint`, `preview`, `eject`, `docs`), flags, interactive mode, installing
+- [Exit codes](./docs/exit-codes.md) — what each `process`/`lint` exit code means
+- [Templates and themes](./docs/templates-and-themes.md) — layout vs. styling, `--template`/`--theme`, the bundled templates (`academic`, `swiss`, `handbook`, `editorial`, `blueprint`, `journal`) and themes (`harbor`, `slate`, `oxblood`, `forest`, `plum`, `sepia`), and customising your own with `mashay eject`
 - [Markdown conventions](./docs/markdown.md) — frontmatter, headings, alerts, code blocks, mermaid, appendix, Obsidian syntax
 - [Contributing](./docs/contributing.md) — project layout, development commands, publishing
 

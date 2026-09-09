@@ -1,10 +1,22 @@
-import { access, mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import {
+  access,
+  copyFile,
+  mkdir,
+  readdir,
+  readFile,
+  writeFile,
+} from "node:fs/promises";
 import path from "node:path";
 import { compile } from "@tailwindcss/node";
 import { Scanner } from "@tailwindcss/oxide";
 import matter from "gray-matter";
 import { VFile } from "vfile";
 import type { ZodError } from "zod";
+import {
+  readColorTokens,
+  validateTemplate,
+  validateTheme,
+} from "./asset-validation.js";
 import { buildChangelog, buildEyebrow, buildMetaGrid } from "./doc-header.js";
 import { BuildError, type BuildErrorKind } from "./errors.js";
 import {
@@ -209,20 +221,23 @@ function parseDocument(
   return { frontmatter: parsed.data, content };
 }
 
-async function renderOne(
-  assets: TemplateAssets,
-  srcPath: string,
-  outDir: string,
-): Promise<{ outNames: string[]; hasMermaid: boolean }> {
-  let raw: string;
+async function readSource(srcPath: string): Promise<string> {
   try {
-    raw = await readFile(srcPath, "utf8");
+    return await readFile(srcPath, "utf8");
   } catch (err) {
     throw new BuildError(
       "source-read",
       `could not read ${srcPath}: ${reason(err)}`,
     );
   }
+}
+
+async function renderOne(
+  assets: TemplateAssets,
+  srcPath: string,
+  outDir: string,
+): Promise<{ outNames: string[]; hasMermaid: boolean }> {
+  const raw = await readSource(srcPath);
 
   const { frontmatter, content } = parseDocument(raw, srcPath);
   const base = path.basename(srcPath, ".md");
@@ -300,32 +315,53 @@ export async function listThemeSwatches(): Promise<ThemeSwatch[]> {
   );
 }
 
+function exists(file: string): Promise<boolean> {
+  return access(file).then(
+    () => true,
+    () => false,
+  );
+}
+
+// A --template/--theme value carrying a path separator ("./brand", "../shared",
+// "C:\\brand") names a directory on disk; anything else names a bundled asset.
+function isPathLike(value: string): boolean {
+  return /[\\/]/.test(value);
+}
+
+async function resolveCustomAsset(
+  dir: string,
+  filename: string,
+  kind: BuildErrorKind,
+): Promise<string> {
+  const file = path.resolve(dir, filename);
+  if (await exists(file)) return file;
+  throw new BuildError(kind, `no ${filename} in "${path.resolve(dir)}"`);
+}
+
 async function resolveTemplateFile(name: string): Promise<string> {
-  const file = path.join(TEMPLATES_DIR, name, "template.html");
-  try {
-    await access(file);
-    return file;
-  } catch {
-    const available = await listNames(TEMPLATES_DIR);
-    throw new BuildError(
-      "unknown-template",
-      `unknown template "${name}" — available templates: ${available.join(", ") || "(none)"}`,
-    );
+  if (isPathLike(name)) {
+    return resolveCustomAsset(name, "template.html", "unknown-template");
   }
+  const file = path.join(TEMPLATES_DIR, name, "template.html");
+  if (await exists(file)) return file;
+  const available = await listNames(TEMPLATES_DIR);
+  throw new BuildError(
+    "unknown-template",
+    `unknown template "${name}" — available templates: ${available.join(", ") || "(none)"}`,
+  );
 }
 
 async function resolveThemeFile(name: string): Promise<string> {
-  const file = path.join(THEMES_DIR, name, "theme.css");
-  try {
-    await access(file);
-    return file;
-  } catch {
-    const available = await listNames(THEMES_DIR);
-    throw new BuildError(
-      "unknown-theme",
-      `unknown theme "${name}" — available themes: ${available.join(", ") || "(none)"}`,
-    );
+  if (isPathLike(name)) {
+    return resolveCustomAsset(name, "theme.css", "unknown-theme");
   }
+  const file = path.join(THEMES_DIR, name, "theme.css");
+  if (await exists(file)) return file;
+  const available = await listNames(THEMES_DIR);
+  throw new BuildError(
+    "unknown-theme",
+    `unknown theme "${name}" — available themes: ${available.join(", ") || "(none)"}`,
+  );
 }
 
 // Assembles the Tailwind v4 input: the framework and typography plugin, then
@@ -335,10 +371,9 @@ async function resolveThemeFile(name: string): Promise<string> {
 // reliably win over the generated `prose` utilities. The template CSS is
 // optional — a template styled purely with utilities can omit template.css.
 async function buildCssInput(
-  themeFile: string,
+  theme: string,
   templateCssFile: string,
 ): Promise<string> {
-  const theme = await readFile(themeFile, "utf8");
   const templateCss = await readFile(templateCssFile, "utf8").catch(() => "");
   return [
     '@import "tailwindcss";',
@@ -346,6 +381,49 @@ async function buildCssInput(
     theme,
     templateCss,
   ].join("\n");
+}
+
+function formatAssetProblems(
+  label: string,
+  file: string,
+  problems: string[],
+): string {
+  return `invalid ${label} ${file}:\n${problems.map((problem) => `  - ${problem}`).join("\n")}`;
+}
+
+// The colour-token contract templates are written against is whatever the
+// default theme declares, so a token added there is required of custom themes
+// without a second list to keep in step.
+async function requiredColorTokens(): Promise<Set<string>> {
+  const css = await readFile(
+    path.join(THEMES_DIR, DEFAULT_THEME, "theme.css"),
+    "utf8",
+  );
+  return readColorTokens(css);
+}
+
+async function loadTemplateHtml(templateFile: string): Promise<string> {
+  const html = await readFile(templateFile, "utf8");
+  const problems = validateTemplate(html);
+  if (problems.length > 0) {
+    throw new BuildError(
+      "invalid-template",
+      formatAssetProblems("template", templateFile, problems),
+    );
+  }
+  return html;
+}
+
+async function loadThemeCss(themeFile: string): Promise<string> {
+  const css = await readFile(themeFile, "utf8");
+  const problems = validateTheme(css, await requiredColorTokens());
+  if (problems.length > 0) {
+    throw new BuildError(
+      "invalid-theme",
+      formatAssetProblems("theme", themeFile, problems),
+    );
+  }
+  return css;
 }
 
 // Compiles the CSS for a single assembled page. A fresh compiler is created per
@@ -373,8 +451,11 @@ async function loadTemplateAssets(
   const themeFile = await resolveThemeFile(options.theme);
   const templateCssFile = path.join(path.dirname(templateFile), "template.css");
 
-  const template = await readFile(templateFile, "utf8");
-  const cssInput = await buildCssInput(themeFile, templateCssFile);
+  const template = await loadTemplateHtml(templateFile);
+  const cssInput = await buildCssInput(
+    await loadThemeCss(themeFile),
+    templateCssFile,
+  );
 
   const mermaidScript = [
     `<script src="${MERMAID_CDN_URL}"></script>`,
@@ -459,16 +540,119 @@ export async function buildDocuments(
       const { outNames, hasMermaid } = await renderOne(assets, file, outDir);
       results.push({ file, outNames, hasMermaid });
     } catch (err) {
-      if (err instanceof BuildError) {
-        failures.push({ file, kind: err.kind, message: err.message });
-      } else {
-        failures.push({
-          file,
-          kind: "render",
-          message: `failed to render ${file}: ${reason(err)}`,
-        });
-      }
+      failures.push(toFailure(file, err));
     }
   }
   return { results, failures };
+}
+
+function toFailure(file: string, err: unknown): BuildFailure {
+  if (err instanceof BuildError) {
+    return { file, kind: err.kind, message: err.message };
+  }
+  return {
+    file,
+    kind: "render",
+    message: `failed to render ${file}: ${reason(err)}`,
+  };
+}
+
+export interface LintSummary {
+  checked: string[];
+  failures: BuildFailure[];
+}
+
+async function lintOne(srcPath: string): Promise<void> {
+  const raw = await readSource(srcPath);
+  const { frontmatter, content } = parseDocument(raw, srcPath);
+  await resolveLogo(frontmatter.logo, srcPath);
+  try {
+    await processor.process(new VFile({ value: content, path: srcPath }));
+  } catch (err) {
+    throw new BuildError(
+      "render",
+      `failed to render ${srcPath}: ${reason(err)}`,
+    );
+  }
+}
+
+/**
+ * Checks each Markdown file for the problems that would fail a build — an
+ * unreadable source, malformed frontmatter, an unresolvable logo, a pipeline
+ * failure — without writing anything or compiling any CSS. The template and
+ * theme are validated once up front, so an unusable pair throws rather than
+ * being reported against every document.
+ */
+export async function lintDocuments(
+  files: string[],
+  options: BuildOptions,
+): Promise<LintSummary> {
+  if (files.length === 0) return { checked: [], failures: [] };
+
+  await loadTemplateAssets(options);
+
+  const checked: string[] = [];
+  const failures: BuildFailure[] = [];
+  for (const file of files) {
+    try {
+      await lintOne(file);
+      checked.push(file);
+    } catch (err) {
+      failures.push(toFailure(file, err));
+    }
+  }
+  return { checked, failures };
+}
+
+/** Where to copy a template/theme pair, and which pair to copy. */
+export interface EjectOptions {
+  template: string;
+  theme: string;
+  dir: string;
+}
+
+/**
+ * Copies a template and theme into `dir` as an editable starting point, laid
+ * out so the directory serves as both a `--template` and a `--theme` value.
+ * Returns the absolute paths written, template first. Refuses to overwrite: if
+ * `dir` already holds any of the files, nothing is written and an
+ * eject-conflict BuildError is thrown.
+ */
+export async function ejectAssets(options: EjectOptions): Promise<string[]> {
+  const templateFile = await resolveTemplateFile(options.template);
+  const themeFile = await resolveThemeFile(options.theme);
+  const templateCssFile = path.join(path.dirname(templateFile), "template.css");
+
+  const sources = [templateFile];
+  if (await exists(templateCssFile)) sources.push(templateCssFile);
+  sources.push(themeFile);
+
+  const dir = path.resolve(options.dir);
+  const copies = sources.map((from) => ({
+    from,
+    to: path.join(dir, path.basename(from)),
+  }));
+
+  const present = await Promise.all(copies.map((copy) => exists(copy.to)));
+  const clashes = copies
+    .filter((_, index) => present[index])
+    .map((copy) => path.basename(copy.to));
+  if (clashes.length > 0) {
+    throw new BuildError(
+      "eject-conflict",
+      `${dir} already contains ${clashes.join(", ")} — eject into an empty directory, or remove those files first`,
+    );
+  }
+
+  try {
+    await mkdir(dir, { recursive: true });
+  } catch (err) {
+    throw new BuildError(
+      "output-dir",
+      `could not create directory ${dir}: ${reason(err)}`,
+    );
+  }
+
+  await Promise.all(copies.map((copy) => copyFile(copy.from, copy.to)));
+  return copies.map((copy) => copy.to);
 }
