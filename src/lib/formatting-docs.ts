@@ -8,7 +8,7 @@ export interface FormattingTopic {
 }
 
 const EXIT_CODES_SUMMARY = [
-  "`mashay process` exits 0 when every document builds and non-zero on any failure. Per-document failures are isolated — one bad document is reported to stderr but never stops the rest of a batch. Setup problems (unknown template/theme, missing input, uncreatable output directory) abort the whole run.",
+  "`mashay process` exits 0 when every document builds and non-zero on any failure. Per-document failures are isolated — one bad document is reported to stderr but never stops the rest of a batch. Setup problems (an unknown or unusable template/theme, missing input, uncreatable output directory) abort the whole run. `mashay lint` reports the same problems with the same codes, without writing output.",
   "",
   "When a batch fails, the exit code is the specific code below if every failure shares one kind, or 30 (mixed) if they differ — the full per-document breakdown is always printed regardless.",
   "",

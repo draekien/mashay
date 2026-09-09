@@ -1,8 +1,8 @@
 /**
  * A classified build failure. The setup kinds (unknown-template, unknown-theme,
- * no-input, output-dir, eject-conflict) abort the whole run; the document kinds
- * (frontmatter, logo, source-read, render) are isolated so a batch can continue
- * past them.
+ * no-input, output-dir, eject-conflict, invalid-template, invalid-theme) abort
+ * the whole run; the document kinds (frontmatter, logo, source-read, render)
+ * are isolated so a batch can continue past them.
  */
 export type BuildErrorKind =
   | "unknown-template"
@@ -10,6 +10,8 @@ export type BuildErrorKind =
   | "no-input"
   | "output-dir"
   | "eject-conflict"
+  | "invalid-template"
+  | "invalid-theme"
   | "frontmatter"
   | "logo"
   | "source-read"
@@ -69,6 +71,18 @@ export const EXIT_CODE_TABLE: ExitCodeEntry[] = [
     kind: "eject-conflict",
     description:
       "Eject target directory already holds a file eject would write.",
+  },
+  {
+    code: 15,
+    kind: "invalid-template",
+    description:
+      "Template is unusable — a required placeholder is missing, or one is unrecognised.",
+  },
+  {
+    code: 16,
+    kind: "invalid-theme",
+    description:
+      "Theme is unusable — it omits colour tokens templates rely on.",
   },
   {
     code: 20,

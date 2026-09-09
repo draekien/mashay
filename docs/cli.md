@@ -56,6 +56,30 @@ npx @draekien/mashay preview --template academic  # pick only the theme
 npx @draekien/mashay preview --template academic --theme harbor  # no prompts
 ```
 
+`mashay lint [src] [--template <name|dir>] [--theme <name|dir>]` answers "would
+`process` succeed on this?" without writing anything. It checks each document
+for an unreadable source, malformed frontmatter, a logo that doesn't resolve,
+and a pipeline failure, and validates the template/theme up front:
+
+```bash
+npx @draekien/mashay lint                       # the current directory
+npx @draekien/mashay lint ./docs
+npx @draekien/mashay lint ./docs --template ./brand
+```
+
+```
+ok      guide.md
+failed  invalid frontmatter in notes.md:
+  - title: Invalid input
+2 checked, 1 failed
+```
+
+`[src]` defaults to `.` and is discovered exactly as `process <src>` discovers
+it — a directory means its top-level `.md` files, not subdirectories — so lint
+sees the same file set the build it stands in for would. Exit codes are the
+same too (see [Exit codes](./exit-codes.md)), which makes it usable as a CI or
+pre-commit gate.
+
 `mashay eject <dir> [--template <name>] [--theme <name>]` copies a bundled
 template and theme into `<dir>` — `template.html`, `template.css`, and
 `theme.css` side by side — as a starting point for a custom one. Defaults are

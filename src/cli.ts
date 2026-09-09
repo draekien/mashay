@@ -22,6 +22,7 @@ import {
   DEFAULT_TEMPLATE,
   DEFAULT_THEME,
   ejectAssets,
+  lintDocuments,
   listTemplates,
   listThemeSwatches,
   renderToHtml,
@@ -233,6 +234,67 @@ function reportResults(summary: BuildSummary): void {
     console.error(chalk.red("failed"), f.message);
   }
   if (summary.failures.length > 0) {
+    process.exitCode = aggregateExitCode(summary.failures.map((f) => f.kind));
+  }
+}
+
+program
+  .command("lint")
+  .description(
+    "Check Markdown for problems that would fail a build, without writing any output",
+  )
+  .argument(
+    "[src]",
+    "markdown file or directory to check (defaults to the current directory)",
+    ".",
+  )
+  .option(
+    "--template <name|dir>",
+    "template to validate against (defaults to academic)",
+  )
+  .option(
+    "--theme <name|dir>",
+    "theme to validate against (defaults to harbor)",
+  )
+  .action(async (src: string, opts: { template?: string; theme?: string }) => {
+    try {
+      await runLint(
+        src,
+        opts.template ?? DEFAULT_TEMPLATE,
+        opts.theme ?? DEFAULT_THEME,
+      );
+    } catch (err) {
+      reportError(err);
+    }
+  });
+
+// Discovery matches `process <src>` exactly, so lint sees the same file set the
+// build it stands in for would.
+async function runLint(
+  src: string,
+  template: string,
+  theme: string,
+): Promise<void> {
+  const cwd = process.cwd();
+  const files = await resolveMarkdownFiles(path.resolve(cwd, src));
+  if (files.length === 0) {
+    throw new BuildError("no-input", `no .md files found in ${src}`);
+  }
+
+  const summary = await lintDocuments(files, { template, theme });
+
+  for (const file of summary.checked) {
+    console.log(chalk.green("ok"), path.relative(cwd, file));
+  }
+  for (const failure of summary.failures) {
+    console.error(chalk.red("failed"), failure.message);
+  }
+
+  const failed = summary.failures.length;
+  const line = `${files.length} checked, ${failed} failed`;
+  console.log(failed > 0 ? chalk.yellow(line) : chalk.green(line));
+
+  if (failed > 0) {
     process.exitCode = aggregateExitCode(summary.failures.map((f) => f.kind));
   }
 }
